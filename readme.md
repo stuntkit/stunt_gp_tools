@@ -14,7 +14,7 @@ Then there's file data
 
 If you go to the addres of something + 4100 bytes you will be at the descriptor of the first file
 
-##File descriptor
+## File descriptor
 
 * 4 bytes - unknown, most files have this set to `00 00 00 00`
 * 4 bytes - file offset
