@@ -1,6 +1,6 @@
 Stunt GP tools
 ==
-These tools will help you understand, unpack and edit Stund GP files
+These tools will help you understand, unpack and edit Stunt GP files
 
 # WAD packs
 every address is in little endian format, almost everything is 4bytes padded
