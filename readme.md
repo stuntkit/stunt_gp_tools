@@ -38,7 +38,7 @@ It only outputs BMP files, so alpha is lost. And sadly, it's just assemby with n
 Compressed data seems to always have even number of bytes, and probably is read by 2 bytes
 
 ## Unpacked image data
-Uncompressed image data uses 2 bytes for each pixel, probably RGBA 4444, might be A1 R5 G5 B5 as well
+Uncompressed image data uses 2 bytes for each pixel, probably A1 R5 G5 B5
 
 # Various
 
