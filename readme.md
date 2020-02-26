@@ -34,6 +34,9 @@ Every address and size is in little endian format
 ## Unpacked image data
 Uncompressed image data uses 2 bytes for each pixel, in A1 R5 G5 B5 format
 
+## pc_pack.py
+Very simple and naive implementation for non-alpha images to see if they will work in-game, no compression yet.
+
 # Various
 
 * wads/fonts.wad: graphics24/fonts/index.txt - uses ISO-8859-1 encoding
