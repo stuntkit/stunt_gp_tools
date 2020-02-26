@@ -28,17 +28,11 @@ Every address and size is in little endian format
 * 2 bytes???? perhaps format? I only seen this as `03 00`
 * 2 bytes width, theroretically up to 65 535
 * 2 bytes height
-* compressed image data starts at 0xA
+* compressed image data starts at 0xA, see convert.py for implementation details
 
-## compression
-Unknown, but there's working decompressor from Martin here:  [https://forum.re-volt.io/viewtopic.php?t=391](https://forum.re-volt.io/viewtopic.php?t=391).  
-It only outputs BMP files, so alpha is lost. And sadly, it's just assemby with no comments or idea how it works.
-
-### What I know
-Compressed data seems to always have even number of bytes, and probably is read by 2 bytes
 
 ## Unpacked image data
-Uncompressed image data uses 2 bytes for each pixel, probably A1 R5 G5 B5
+Uncompressed image data uses 2 bytes for each pixel, in A1 R5 G5 B5 format
 
 # Various
 
