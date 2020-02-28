@@ -13,7 +13,8 @@ every address and size is in little endian format, almost everything is 4bytes p
     * There may be `00` padding after that, so the next file starts at offset % 4 == 0
 * at the "address of something" there is `0A 00 00 00`
 * After this 4096 bytes of something that I was unable to figure out what it is, necessary for game apparently
-    * I only seen groups of 2 bytes at best, so that would be max 2048 entries, need to find archive with smallest gaps between data here
+    * probably in groups of 4 bytes (always 2 bytes of data, smallest gap between data 2 `00` bytes)
+    * 1024 entries
 * Later on (the "addres of something" + 4100 bytes) is where the file descriptors start, each one have following structure:
 
 ## File descriptor
