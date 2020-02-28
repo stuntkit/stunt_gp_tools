@@ -70,8 +70,9 @@ def extract_files(filename):
             out = 'out/' + packed_file['name'].replace('\\', '/')
             pathlib.Path(out).parent.mkdir(parents=True, exist_ok=True)
             with open(out, 'wb') as extracted_file:
+                wad_file.seek(packed_file['offset'])
                 extracted_file.write(wad_file.read(packed_file['size']))
-            print(packed_file['name'])
+            print(packed_file['name'], hex(packed_file['offset']), packed_file['size'])
 
 def main():
     print ("read files from Stunt GP .wad files, expects wthem in `wads` folder")
