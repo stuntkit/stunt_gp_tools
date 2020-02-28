@@ -11,7 +11,7 @@ every address and size is in little endian format, almost everything is 4bytes p
 * file data, usually starts at 0xC and spans up to the "address of something"
     * There's `1A 00` ath the end of each file
     * There may be `00` padding after that, so the next file starts at offset % 4 == 0
-* at the "address of something" there is `1A 00`
+* at the "address of something" there is `0A 00`
 * After this 4096 bytes of something that I was unable to figure out what it is, necessary for game apparently
 * Later on (the "addres of something" + 4100 bytes) is where the file descriptors start, each one have following structure:
 
