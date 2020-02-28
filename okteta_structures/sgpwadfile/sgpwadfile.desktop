@@ -1,0 +1,17 @@
+[Desktop Entry]
+Encoding=UTF-8
+Icon=arrow-up
+Type=Service
+ServiceTypes=KPluginInfo
+
+Name=Stunt GP WAD file structure
+Comment=Structure of file metadata at the end of an archive
+
+X-KDE-PluginInfo-Author=Piotr Halama
+X-KDE-PluginInfo-Email=skrzynka@halamix2.pl
+X-KDE-PluginInfo-Name=sgpwadfile
+X-KDE-PluginInfo-Version=1.0
+X-KDE-PluginInfo-Website=http://halamix2.pl/
+X-KDE-PluginInfo-Category=structure/js
+X-KDE-PluginInfo-License=LGPL
+X-KDE-PluginInfo-EnabledByDefault=false
