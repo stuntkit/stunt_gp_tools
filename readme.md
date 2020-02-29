@@ -14,8 +14,14 @@ every address and size is in little endian format, almost everything is 4bytes p
 * at the "address of something" there is `0A 00 00 00`
 * After this 4096 bytes of something that I was unable to figure out what it is, necessary for game apparently
     * probably in groups of 4 bytes (always 2 bytes of data, smallest gap between data 2 `00` bytes)
-    * 1024 entries
-* Later on (the "addres of something" + 4100 bytes) is where the file descriptors start, each one have following structure"
+    * each entry value + "address of something" is a pointer to corresponding *file descriptor*  
+    * bytes never overlap between all .wad files
+    * 1024 4bytes entries theory
+        * Combined from all .wad files, only 739 of these entries contain data
+    * To do
+        * Why the data are on these coordinates?
+            * Hardcoded table of 1024 entries? There are over 1300 .pc textures in game archives, maybe if we group all tires etc. together it would be closer to 739?
+* Later on (the "addres of something" + 4100 bytes) is where the **file descriptors** start, each one have following structure"
     * 4 bytes - unknown, most files have this set to `00 00 00 00`, few have other stuff there, TODO
     * 4 bytes - file offset in archive, should be 4 bytes aligned
     * 4 bytes - file size
