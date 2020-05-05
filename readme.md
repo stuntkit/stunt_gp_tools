@@ -35,6 +35,8 @@ All textures are in this format, biggest textures used in game have 256x256 pixe
 ### Unpacked image data
 Uncompressed image data uses 2 bytes for each pixel, in A1 R5 G5 B5 format. In some places game uses additional file with greyscale alpha channel to compensate for 1bit alpha.
 
+# Config files
+Binary config files are described in okteta structures directory, text ones are self-explanatory
 
 # Various
 
