@@ -1,13 +1,3 @@
-function footerFilesUpdate(root) {
-    var elements = 0;
-    
-    for( var i=0; i < this.parent.unknown.length; i++) {
-        if(this.parent.unknown[i].value != 0x00) {
-            elements++;
-        }
-    }
-    this.Files.length =  elements; 
-}
 
 function pathPaddingUpdate(root) {
     var pad = 4 - (this.parent.path.byteCount % 4);
@@ -53,18 +43,13 @@ function init() {
         return valid;
     };
     
-    //ugly hack, but works
-    var footerFiles = struct({
-        Files: array(fileMeta, 0),
-    });
-    footerFiles.updateFunc = footerFilesUpdate;
     
     var footer = struct({
         footerHeader: uint32(),
         unknown: array(uint32(), 1024),
         //TODO fix this, will show files, but will also show lots of empty entries and EOF error
         //I don't knwo how to make Okteta read until EOF and then just end
-        Files: footerFiles,
+        Files: array(fileMeta, 1024), 
     });
     footer.name = "footer";
     
