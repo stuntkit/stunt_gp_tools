@@ -38,6 +38,11 @@ Uncompressed image data uses 2 bytes for each pixel, in A1 R5 G5 B5 format. In s
 # Config files
 Binary config files are described in okteta structures directory, text ones are self-explanatory
 
+* music volume is always set to 100 on save, other volumes just gets copied from config.cfg file
+* place for path is 200 bytes long, it's ASCII string (unicode might work, probably not made with that in mind) terminated by "\0".
+
 # Various
 
 * wads/fonts.wad: graphics24/fonts/index.txt - uses ISO-8859-1 encoding
+* in StuntGP_D3D.exe all radeon grapics card have blocked best quality settings, including newest ones.
+* Resolution is limited to 2560x2560 in binary and ddraw.dll. Editing binary and using another dll should allow to override this limit.
