@@ -6,10 +6,12 @@
 	<entry name="DirectX" value="0" />
 	<entry name="Glide" value="1" />
     </enumDef>
-        <enumDef name="OffOn" type="UInt32">
+	
+    <enumDef name="OffOn" type="UInt32">
 	<entry name="Disabled" value="0" />
 	<entry name="Enabled" value="1" />
     </enumDef>
+	
     <struct name="SGP config" defaultLockOffset="0x0" byteOrder="little-endian">
             <array name="path" length="200">
 		<primitive name="path" type="Char" />
