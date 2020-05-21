@@ -30,10 +30,12 @@ class DIR():
             size = struct.unpack("<L", dir_file.read(4))[0]
             offset = struct.unpack("<L", dir_file.read(4))[0]
             dir_file.seek(offset + 4)
+            j=0
             for i in range(1024):
 
                 descriptor_offset = struct.unpack("<L", dir_file.read(4))[0]
                 if descriptor_offset != 0:
+                    j = j +1
                     dir_file.seek(offset + descriptor_offset)
                     
                     file_unknown = struct.unpack("<L", dir_file.read(4))[0]
@@ -48,14 +50,14 @@ class DIR():
                     #file_data = read
                     #
                     file_name = file_name.replace(b'\x00', b'').decode('ascii') #('utf8')
-
+                    print(str(i)+"\t"+file_name)
                     dir_file.seek(file_offset)
                     file_data = dir_file.read(file_size)
 
                     new_dir.files[i] = FileEntry(file_unknown, file_name, file_data)
 
                 dir_file.seek(offset + 4 + (4 * (i + 1) ))
-        
+            print(j)
         return new_dir
     
     #TODO
@@ -64,6 +66,11 @@ class DIR():
         new_dir = cls()
         
         folder = Path(folder)
+        '''for r, d, f in os.walk(folder):
+            for filename in f:
+                file_folder = Path(*Path(r).parts[1:])
+                print(file_folder/filename)
+                new_dir.files[self.__calculate_hash(file_folder/filename)] = FileEntry(int(row['unknown']), row['filename'], tmp_data)'''
         with open(folder/'dir.csv') as descriptor_file:
             csv_reader = csv.DictReader(descriptor_file)#, fieldnames=['id', 'filename', 'unknown'],)
             
@@ -72,7 +79,8 @@ class DIR():
                 tmp_data = b''
                 with open(folder.joinpath(tmp_path), 'rb') as tmp_file:
                     tmp_data = tmp_file.read()
-                new_dir.files[int(row['id'])] = FileEntry(int(row['unknown']), row['filename'], tmp_data)
+                file_hash = new_dir.__calculate_hash(row['filename'])
+                new_dir.files[file_hash] = FileEntry(int(row['unknown']), row['filename'], tmp_data)
         
         return new_dir
     
@@ -101,11 +109,11 @@ class DIR():
                 tmp_filename.parent.mkdir(parents=True, exist_ok=True)
                 with open(tmp_filename, 'wb') as tmp_file:
                     tmp_file.write(file_entry.data)
-                descriptors.append({'id': i, 'filename': file_entry.filename, 'unknown': file_entry.unknown})
+                descriptors.append({'filename': file_entry.filename, 'unknown': file_entry.unknown})
 
         with open(path/'dir.csv', 'w') as descriptor_file:
             #descriptor_file.write('tmp')
-            wr = csv.DictWriter(descriptor_file, fieldnames=['id', 'filename', 'unknown'], quoting=csv.QUOTE_NONNUMERIC)
+            wr = csv.DictWriter(descriptor_file, fieldnames=['filename', 'unknown'], quoting=csv.QUOTE_NONNUMERIC)
             wr.writeheader()
             wr.writerows(descriptors)
     
@@ -152,3 +160,17 @@ class DIR():
         if padding:
             entry = entry + b''.join([b'\x00'] * padding)
         return entry
+
+    @staticmethod
+    def __calculate_hash(filename):
+        filename = filename.encode("ascii", errors="ignore").decode()
+        hash_bits = 10
+        hash_size = 1 << hash_bits
+        
+        hash_calculated = 0
+        for char in filename:
+            hash_calculated = ((hash_calculated << 1) % hash_size) | (hash_calculated >> (hash_bits - 1) & 1)
+            # sum = ((sum << 1) % HASH_SIZE) | (sum >> (HASH_BITS - 1) & 1);
+            hash_calculated = hash_calculated + ord(char)
+            hash_calculated = hash_calculated % hash_size
+        return hash_calculated

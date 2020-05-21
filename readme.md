@@ -18,10 +18,12 @@ This file is exactly the same as Worms .dir file, onyl extension is different.
     * each entry value + "address of directory" is a pointer to corresponding *file descriptor*
     * each position is hardcoded and should always corespond to the same file in archive
 * each **file descriptor** have following structure:
-    * 4 bytes - unknown, most files have this set to `00 00 00 00`, few have other stuff there, TODO
+    * 4 bytes - if two files have the same hash, then hashtable points to first file, which have this 4 bytes pointed to another one with the same hash. If there is no collision then it's 0.
     * 4 bytes - file offset in archive, should be 4 bytes aligned
     * 4 bytes - file size
     * file name with path, 4 bytes aligned, terminated by 0x00 (and padded with 0x00 to 4 bytes)
+
+## PC unpack currently is broken as I based it only on hash
 
 # PC files
 All textures are in this format, biggest textures used in game have 256x256 pixels.
