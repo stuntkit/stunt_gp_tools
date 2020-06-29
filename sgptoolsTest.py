@@ -32,7 +32,7 @@ class App:
             print('done')
     
     @staticmethod
-    def to_wad(directory):
+    def from_folder_to_wad(directory):
         wad = SGPTools.DIR.from_folder(directory)
         if wad:
             print('to dir... ', end='')
@@ -43,9 +43,14 @@ class App:
         #pc = SGPTools.PC.from_pc("grs.pc")
         #if pc:
         #    pc.to_png("test.png")
-        # wad = SGPTools.DIR.from_folder('logos_funky')
-        self.to_folder('wads/p_catal.wad')
-        self.to_wad('catal')
+        wad = SGPTools.DIR.from_dir('wads/p_catal.wad')
+
+        for file_entry in wad.files:
+            print("{}\t{}".format(file_entry.filename, file_entry.hash))
+        wad.to_dir('test.dir')
+
+        #self.to_folder('wads/p_catal.wad')
+        #self.to_wad('catal')
         
         #wad = SGPTools.DIR.from_folder('logos')
         

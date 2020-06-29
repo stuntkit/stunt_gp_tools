@@ -11,7 +11,7 @@ import sys
 import pathlib
 #from glob import glob
 
-from PIL import Image
+from PIL import Image # type: ignore
 
 #binary
 import struct
@@ -25,7 +25,7 @@ class PC():
         self.__data = 0
     
     @classmethod
-    def from_pc(cls, filename):
+    def from_pc(cls, filename: str):
         new_pc = cls()
         with open(filename, 'rb') as pc_file:
             new_pc.__magic = pc_file.read(4)
@@ -39,14 +39,14 @@ class PC():
             print('ok')
             return new_pc
     
-    def from_png(self, filename):
+    def from_png(self, filename: str):
         pass
    
     
-    def to_pc(self, filename):
+    def to_pc(self, filename: str):
         pass
     
-    def to_png(self, filename):
+    def to_png(self, filename: str):
         print('saving to', filename)
         image = Image.new('RGBA', (self.__width, self.__height))
         #Image.new('RGBA', (data['width'], data['height']))
@@ -75,7 +75,7 @@ class PC():
         
         return True
     
-    def __unpack(self, packed_data):
+    def __unpack(self, packed_data: bytes):
         unpacked_data = b''
         i = 0
         
@@ -128,7 +128,7 @@ class PC():
         
         return unpacked_data
         
-    def __pack(self, data):
+    def __pack(self, data: bytes):
         pass
 
     @staticmethod
