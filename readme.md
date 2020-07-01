@@ -2,10 +2,13 @@ Stunt GP tools
 ==
 These tools will help you understand, unpack and edit Stunt GP files
 
-Every address and size is in little endian format, many values are 4bytes aligned/padded
+Original thread: https://forum.xentax.com/viewtopic.php?f=16&t=16944&p=160266#p160266
+
+
+Every address and size is in little endian format, many values are 4 bytes aligned/padded
 
 # WAD packs
-This file is exactly the same as Worms .dir file, onyl extension is different.  
+This file is exactly the same as Worms .dir file, only extension is different.  
 
 * 4 bytes - `44 49 52 1A` - magic ('DIR' and one non-ASCII character)
 * 4 bytes - file size
