@@ -16,6 +16,7 @@ from PIL import Image # type: ignore
 #binary
 import struct
 
+#TODO check if size is at least 1x1
 class PC():
     def __init__(self):
         self.__magic = b'TM!\x1A'
@@ -51,7 +52,7 @@ class PC():
             pixel_16 = 0
 
             # one byte alpha
-            alpha = int(alpha < 128)
+            alpha = int(alpha >= 128)
             pixel_16 += alpha << 15
 
             # convert 0-255 to 0-31
@@ -73,6 +74,12 @@ class PC():
    
     
     def to_pc(self, filename: str):
+        with open(filename, 'wb') as pc_file:
+            pc_file.write(self.__magic)
+            pc_file.write(self.__unknown)
+            pc_file.write(self.__width.to_bytes(2, 'little'))
+            pc_file.write(self.__height.to_bytes(2, 'little'))
+            pc_file.write(self.__pack())
         pass
     
     def to_png(self, filename: str):
@@ -158,9 +165,37 @@ class PC():
         return unpacked_data
         
     # TODO fix
-    def __pack(self, data: Image) -> bytes:
-        unpacked_data = b''
-        return unpacked_data
+    def __pack(self) -> bytes:
+        packed_data = []
+        pixels = memoryview(self.__data).cast('H')
+
+        #1st pixel is passed as-is
+        packed_data.append(pixels[0])
+
+        # skip 1st pixel
+        i = 1
+        # TODO add some abstraction, this is ugly!
+        while i < len(pixels):
+            # if alpha is set
+            if (pixels[i] & (1 << 15) ) >> 15 == 0:
+                count = 1
+                while (i + count) < len(pixels) and pixels[i + count] == 0:
+                    count += 1
+
+                if count > 16384:
+                    # TODO yeah, I know, easy fix, I could just split, but for now this must suffice
+                    raise Exception('too much alpha pixels')
+                packed_data.append(count)
+                i += count - 1
+            else:
+                # stream data
+                packed_data.append(pixels[i])
+                # TODO add compression
+            i += 1
+
+        packed_data = b''.join([n.to_bytes(2, 'little') for n in packed_data])
+        packed_data += b'\00\00'
+        return packed_data
 
     @staticmethod
     def __convert_color(data):
