@@ -73,32 +73,21 @@ class DIR():
         if file_next != 0:
             self.__read_files_from_table(dir_file, table_offset, file_next)
 
-    '''
     @classmethod
     def from_folder(cls, folder: str):
         new_dir = cls()
         
         folder = Path(folder)
-        for filename in Path.glob(folder):
-            print(filename)
-        ''for r, d, f in os.walk(folder):
+        for r, d, f in os.walk(folder):
             for filename in f:
                 file_folder = Path(*Path(r).parts[1:])
-                print(file_folder/filename)
-                new_dir.files[self.__calculate_hash(file_folder/filename)] = FileEntry(int(row['unknown']), row['filename'], tmp_data)''
-        ''with open(folder/'dir.csv') as descriptor_file:
-            csv_reader = csv.DictReader(descriptor_file)#, fieldnames=['id', 'filename', 'unknown'],)
-            
-            for row in csv_reader:
-                tmp_path = Path(row['filename'].replace('\\', '/'))
-                tmp_data = b''
-                with open(folder.joinpath(tmp_path), 'rb') as tmp_file:
-                    tmp_data = tmp_file.read()
-                file_hash = new_dir.__calculate_hash(row['filename'])
-                new_dir.files[file_hash] = FileEntry(int(row['unknown']), row['filename'], tmp_data)''
-        
-        return None #new_dir
-    '''
+                filename_in_archive = str(file_folder/filename)
+                # Linux, ladies and gentlemen
+                filename_in_archive = filename_in_archive.replace('/', '\\')
+
+                with open(Path(r)/filename, 'rb') as data:
+                    new_dir.files.append(FileEntry(filename_in_archive, data.read()))
+        return new_dir
     
     def to_dir(self, filename: str):
 
