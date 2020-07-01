@@ -22,7 +22,7 @@ class PC():
         self.__unknown = b'\x03\x00'
         self.__width = 0
         self.__height = 0
-        self.__data = 0
+        self.__data = b''
     
     @classmethod
     def from_pc(cls, filename: str):
@@ -39,8 +39,37 @@ class PC():
             print('ok')
             return new_pc
     
-    def from_png(self, filename: str):
-        pass
+    @classmethod
+    def from_png(cls, filename: str):
+        new_pc = cls()
+        image = Image.open(filename).convert("RGBA")
+        new_pc.__width = image.width
+        new_pc.__height = image.height
+
+        pixels = list(image.getdata())
+        for r, g, b, alpha in pixels:
+            pixel_16 = 0
+
+            # one byte alpha
+            alpha = int(alpha < 128)
+            pixel_16 += alpha << 15
+
+            # convert 0-255 to 0-31
+            r = int(31*(r/255))
+            pixel_16 += r << 10
+
+            g = int(31*(g/255))
+            pixel_16 += g << 5
+
+            b = int(31*(b/255))
+            pixel_16 += b
+
+            new_pc.__data += pixel_16.to_bytes(2, 'little')
+
+
+        if len(new_pc.__data) == 0:
+            raise Exception('PC data cannot be empty!')
+        return new_pc
    
     
     def to_pc(self, filename: str):
@@ -128,8 +157,10 @@ class PC():
         
         return unpacked_data
         
-    def __pack(self, data: bytes):
-        pass
+    # TODO fix
+    def __pack(self, data: Image) -> bytes:
+        unpacked_data = b''
+        return unpacked_data
 
     @staticmethod
     def __convert_color(data):
