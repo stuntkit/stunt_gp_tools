@@ -21,7 +21,7 @@ def main():
     if not dir:
         raise Exception('Not a folder apparently')
     
-    output = Path(args.filename).parent/Path(args.filename).stem
+    output = str(Path(args.filename).parent/Path(args.filename).stem)+'.dir'
     if args.output:
         output = args.output
     dir.to_dir(output)
