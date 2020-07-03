@@ -52,17 +52,17 @@ class PC():
             pixel_16 = 0
 
             # one byte alpha
-            alpha = int(alpha >= 128)
+            alpha = round(alpha >= 128)
             pixel_16 += alpha << 15
 
             # convert 0-255 to 0-31
-            r = int(31*(r/255))
+            r = round(31*(r/255))
             pixel_16 += r << 10
 
-            g = int(31*(g/255))
+            g = round(31*(g/255))
             pixel_16 += g << 5
 
-            b = int(31*(b/255))
+            b = round(31*(b/255))
             pixel_16 += b
 
             new_pc.__data += pixel_16.to_bytes(2, 'little')
@@ -207,10 +207,10 @@ class PC():
         pixels_data = memoryview(data).cast('H')
         for pixel in pixels_data:
             # 5 bits means 2^5-1 = 31
-            red =  int((pixel >> 10 &   31) * (255/31))
-            green = int((pixel >> 5 &  31) * (255/31))
-            blue = int( (pixel &  31) * (255/31))
-            alpha = int((pixel >15 & 1) * 255)
+            red =  round((pixel >> 10 &   31) * (255/31))
+            green = round((pixel >> 5 &  31) * (255/31))
+            blue = round( (pixel &  31) * (255/31))
+            alpha = round((pixel >15 & 1) * 255)
             
             pixels.append((red, green, blue, alpha))
         return pixels
