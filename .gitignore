@@ -4,5 +4,6 @@ out
 *.pc
 *.wad
 *.pmd
+*.dir
 
 **/__pycache__/*
