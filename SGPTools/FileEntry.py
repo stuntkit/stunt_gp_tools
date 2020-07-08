@@ -48,7 +48,7 @@ class FileEntry:
         
         hash_calculated = 0
         for char in self.filename:
+            # bitise rotate left on 10 bits
             hash_calculated = ((hash_calculated << 1) % hash_size) | (hash_calculated >> (HASH_BITS - 1) & 1)
-            hash_calculated = hash_calculated + ord(char)
-            hash_calculated = hash_calculated % hash_size
+            hash_calculated = (hash_calculated + ord(char)) % hash_size
         return hash_calculated
