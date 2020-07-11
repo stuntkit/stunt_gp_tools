@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../structuredefs.xsd">
+    <struct name="SGP PMD" defaultLockOffset="0x0" byteOrder="little-endian">
+        <struct name="header">
+            <string name="magic" encoding="ascii" maxCharCount="10"/>
+        </struct>
+        <array name="unk" length="166">
+		    <primitive name="unknown" type="Uint8" />
+	    </array>
+	    <array name="sizes" length="34">
+		    <primitive name="size" type="Uint32" />
+	    </array>
+    </struct>
+</data>

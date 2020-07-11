@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../structuredefs.xsd">
+	
+    <enumDef name="Cameras" type="UInt8">
+	    <entry name="Close" value="0xBB" />
+	    <entry name="Medium" value="0xBD" />
+	    <entry name="Chasing" value="0xBF" />
+	    <entry name="Auto" value="0xC1" />
+    </enumDef>
+
+    <struct name="SGP save" defaultLockOffset="0x0" byteOrder="little-endian">
+        <primitive name="unknown" type="UInt32" />
+        
+        <enum name="camera" type="UInt8" enum="Cameras" />
+        
+        <array name="unk2" length="3">
+		    <primitive name="unknown2" type="Uint8" />
+	    </array>
+	    <array name="unk3_3" length="116">
+		    <primitive name="unknown2" type="Uint8" />
+	    </array>
+	    <struct name="audio volumes">
+		    <primitive name="music" type="UInt32" />
+		    <primitive name="sfx" type="UInt32" />
+		    <primitive name="master" type="UInt32" />
+	    </struct>
+	    <array name="unk3" length="8">
+		    <primitive name="unknown3" type="Uint8" />
+	    </array>
+	    <!-- language is 0x90 -->
+	    <!-- international
+	    3 - de
+	    5 - ita 
+	    -->
+	    <!-- In Polish it's just 1-->
+	    <primitive name="language" type="Uint32" />
+	    <array name="unk3" length="3724">
+		    <primitive name="unknown3" type="Uint8" />
+	    </array>
+	    
+        <array name="Championship" length="8">
+		    <struct name="Championship slot">
+		        <!--terminator not defined, dhould always read 4 bytes -->
+	            <string name="name" encoding="ascii" maxCharCount="4"/>
+	            <primitive name="unknown" type="UInt32" />
+	            <primitive name="money" type="UInt32" />
+	            <array name="unkn" length="340">
+		            <primitive name="unkno" type="Uint8" />
+	            </array>
+		    </struct>
+	    </array>
+	    
+	    <array name="unk4" length="1788">
+		    <primitive name="unknown4" type="Uint8" />
+	    </array>
+    </struct>
+</data>
