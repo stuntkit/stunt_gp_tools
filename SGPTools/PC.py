@@ -77,12 +77,13 @@ class PC():
    
     
     def to_pc(self, filename: str):
+        packed = self.__pack()
         with open(filename, 'wb') as pc_file:
             pc_file.write(self.__magic)
             pc_file.write(self.__unknown)
             pc_file.write(self.__width.to_bytes(2, 'little'))
             pc_file.write(self.__height.to_bytes(2, 'little'))
-            pc_file.write(self.__pack())
+            pc_file.write(packed)
         pass
     
     def to_png(self, filename: str):
@@ -127,7 +128,6 @@ class PC():
         unpacked_data[0] = current_word.to_bytes(2, 'little')
         p += 1
         u += 1 # unpacked
-        
         while True:
             current_word = packed_data[p]
             
@@ -147,11 +147,10 @@ class PC():
                 location = current_word & 0x7FF
                 head = u - 1
                 
-                if repeats <= 8:
-                    for j in range(repeats+1):
-                        #repeat two bytes from output
-                        unpacked_data[u] = unpacked_data[head - location + j]
-                        u += 1
+                for j in range(repeats+1):
+                    #repeat two bytes from output
+                    unpacked_data[u] = unpacked_data[head - location + j]
+                    u += 1
 
             else:
                 # get 13 bits from last pixel
@@ -170,7 +169,7 @@ class PC():
                 if fill == 2:
                     unpacked_data[u] + b'\x00\x00'
                     u += 1
-        
+    
         return b''.join(unpacked_data)
         
     # TODO fix
@@ -182,27 +181,55 @@ class PC():
         packed_data.append(pixels[0])
 
         # skip 1st pixel
-        i = 1
+        u = 1
         # TODO add some abstraction, this is ugly!
         length = len(pixels)
-        while i < length:
-            # if alpha is set
-            if (pixels[i] & (1 << 15) ) >> 15 == 0:
-                count = 1
-                while (i + count) < length and pixels[i + count] == 0:
-                    count += 1
+        while u < length:
+            # count repeating pixels
+            # location can be max 2^11 -1 = 2047
+            # count can be between 1-8
+            count = 0
+            location = 0
+            for j in range(min(u, 2048), 0, -1):#range(1, min(u + 1, 2049)):
+                current_count = 0
+                # while current_count < 8 and u + current_count < length and u - j + current_count < u and (pixels[u - j + current_count] == pixels[u + current_count]):
+                while current_count < 9 and u + current_count + 1 < length and pixels[u - j + current_count] == pixels[u + current_count]:
+                    current_count += 1
+                    # print(u, j, current_count)
+                
+                if current_count > count:
+                    # print(u, j, current_count)
+                    count = current_count
+                    location = j
+                    
+                if count == 8:
+                    break
 
-                if count > 16384:
-                    # TODO yeah, I know, easy fix, I could just split, but for now this must suffice
-                    raise Exception('too much alpha pixels')
-                packed_data.append(count)
-                i += count - 1
+            if count > 1: #it's only viable for more than 1 pixel
+                #pack data
+                package = 0b0100000000000000
+                if count > 9:
+                    print(count)
+                    raise Exception('too much')
+                if location > 2048:
+                    raise Exception('too far')
+                package += (count-2) << 11
+                package += location-1
+                packed_data.append(package)
+                u += count
             else:
-                # cursor = max
-                # stream data
-                packed_data.append(pixels[i])
-                # TODO add compression
-            i += 1
+                if (pixels[u] & (1 << 15) ) >> 15 == 0:
+                    # if alpha is set
+                    count = 1
+                    # it should split after 16384 pixels
+                    while u + count + 1 < length and pixels[u + count] == 0 and count < 16383:
+                        count += 1
+                    packed_data.append(count)
+                    u += count
+                else:
+                    # stream data
+                    packed_data.append(pixels[u])
+                    u += 1
 
         packed_data = b''.join([n.to_bytes(2, 'little') for n in packed_data])
         packed_data += b'\00\00'
