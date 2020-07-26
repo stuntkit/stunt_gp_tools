@@ -90,7 +90,7 @@ class PC():
         print('saving to', filename)
         image = Image.new('RGBA', (self.__width, self.__height))
         #Image.new('RGBA', (data['width'], data['height']))
-        image.putdata(self.__convert_color(self.__data))
+        image.putdata(self.__convert_colours(self.__data, self.__width, self.__height))
         image.save(filename, 'PNG')
     
     def check(self) -> bool:
@@ -174,20 +174,22 @@ class PC():
         
     # TODO fix
     def __pack(self) -> bytes:
-        packed_data = []
         pixels = memoryview(self.__data).cast('H')
 
+        # adding to array is faster than appending, so we take big enough array that will be cut to size later
+        packed_data = [0] * len(pixels)
         #1st pixel is passed as-is
-        packed_data.append(pixels[0])
+        packed_data[0] = pixels[0]
 
         # skip 1st pixel
         u = 1
+        p = 1
         # TODO add some abstraction, this is ugly!
         length = len(pixels)
         while u < length:
             # count repeating pixels
             # location can be max 2^11 -1 = 2047
-            # count can be between 1-8
+            # count can be between 2-10
             count = 0
             location = 0
             for j in range(min(u, 2048), 0, -1):#range(1, min(u + 1, 2049)):
@@ -210,7 +212,8 @@ class PC():
                 package = 0b0100000000000000
                 package += (count-2) << 11
                 package += location-1
-                packed_data.append(package)
+                packed_data[p] = package
+                p += 1
                 u += count
             else:
                 if (pixels[u] & (1 << 15) ) >> 15 == 0:
@@ -219,22 +222,27 @@ class PC():
                     # it should split after 16384 pixels
                     while u + count + 1 < length and pixels[u + count] == 0 and count < 16383:
                         count += 1
-                    packed_data.append(count)
+                    packed_data[p] = count
+                    p += 1
                     u += count
                 else:
                     # stream data
-                    packed_data.append(pixels[u])
+                    packed_data[p] = pixels[u]
+                    p += 1
                     u += 1
 
+        terminator = packed_data.index(0)
+        packed_data = packed_data[:terminator]
         packed_data = b''.join([n.to_bytes(2, 'little') for n in packed_data])
         packed_data += b'\00\00'
         return packed_data
 
     @staticmethod
-    def __convert_color(data):
-        pixels = []
+    def __convert_colours(data, width: int, height: int):
+        pixels = [0] * width * height
         if len(data) % 2 != 0:
             sys.exit('wrong number of data for color converter')
+        u = 0
 
         #each pixel is stored on 2 bytes, in A1 R5 G5 B5  format
         pixels_data = memoryview(data).cast('H')
@@ -245,7 +253,8 @@ class PC():
             blue = round( (pixel &  31) * (255/31))
             alpha = round((pixel >15 & 1) * 255)
             
-            pixels.append((red, green, blue, alpha))
+            pixels[u] = (red, green, blue, alpha)
+            u += 1
         return pixels
 '''
 class C:
