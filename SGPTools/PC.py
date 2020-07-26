@@ -144,13 +144,13 @@ class PC():
             # is 14th bit set
             if (current_word >> 14) & 1 == 1:
                 repeats = ((current_word>>11) & 7) + 1
-                location = ( current_word & 0x7FF ) * 2
-                head = len(unpacked_data)
+                location = current_word & 0x7FF
+                head = u - 1
                 
                 if repeats <= 8:
                     for j in range(repeats+1):
                         #repeat two bytes from output
-                        unpacked_data[u] = unpacked_data[head+(2*j)-location-2].to_bytes(1, 'little') + unpacked_data[head+(2*j)-location-1].to_bytes(1, 'little')
+                        unpacked_data[u] = unpacked_data[head - location + j]
                         u += 1
 
             else:
