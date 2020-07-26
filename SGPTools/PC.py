@@ -48,6 +48,8 @@ class PC():
         new_pc.__height = image.height
 
         pixels = list(image.getdata())
+        data = [b'\x00\x00'] * new_pc.__width * new_pc.__height
+        i = 0
         for r, g, b, alpha in pixels:
             pixel_16 = 0
 
@@ -65,8 +67,10 @@ class PC():
             b = round(31*(b/255))
             pixel_16 += b
 
-            new_pc.__data += pixel_16.to_bytes(2, 'little')
+            data[i] = pixel_16.to_bytes(2, 'little')
+            i += 1
 
+        new_pc.__data = b''.join(data)
 
         if len(new_pc.__data) == 0:
             raise Exception('PC data cannot be empty!')
@@ -175,11 +179,12 @@ class PC():
         # skip 1st pixel
         i = 1
         # TODO add some abstraction, this is ugly!
-        while i < len(pixels):
+        length = len(pixels)
+        while i < length:
             # if alpha is set
             if (pixels[i] & (1 << 15) ) >> 15 == 0:
                 count = 1
-                while (i + count) < len(pixels) and pixels[i + count] == 0:
+                while (i + count) < length and pixels[i + count] == 0:
                     count += 1
 
                 if count > 16384:
@@ -188,6 +193,7 @@ class PC():
                 packed_data.append(count)
                 i += count - 1
             else:
+                # cursor = max
                 # stream data
                 packed_data.append(pixels[i])
                 # TODO add compression
