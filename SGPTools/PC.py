@@ -34,10 +34,9 @@ class PC():
             new_pc.__width = struct.unpack("<H",pc_file.read(2))[0]
             new_pc.__height = struct.unpack("<H",pc_file.read(2))[0]
             
-            new_pc.__data = new_pc.__unpack(pc_file.read())
+            new_pc.__data = new_pc.__unpack(pc_file.read(), new_pc.__width, new_pc.__height)
             
         if new_pc.check():
-            print('ok')
             return new_pc
     
     @classmethod
@@ -115,29 +114,32 @@ class PC():
         
         return True
     
-    def __unpack(self, packed_data: bytes):
-        unpacked_data = b''
-        i = 0
+    def __unpack(self, packed_data: bytes, width: int, height: int):
+        unpacked_data = [b'\x00\x00'] * width * height
+        p = 0
+        u = 0
         
         # as everything, read data by 2 bytes
         packed_data = memoryview(packed_data).cast('H')
-        current_word = packed_data[i]
+        current_word = packed_data[p]
         
         #copy first pixel to output
-        unpacked_data = unpacked_data + current_word.to_bytes(2, 'little')
-        i = i + 1
+        unpacked_data[0] = current_word.to_bytes(2, 'little')
+        p += 1
+        u += 1 # unpacked
         
         while True:
-            current_word = packed_data[i]
+            current_word = packed_data[p]
             
             # just stream pixels while 15th bit set.
             # It is also used for alpha channel, so we know for a fact that these pixels are opaque
             while (current_word >> 15) & 1 == 1:
-                i = i + 1
-                unpacked_data = unpacked_data + current_word.to_bytes(2, 'little')
-                current_word = packed_data[i]
+                p = p + 1
+                unpacked_data[u] = current_word.to_bytes(2, 'little')
+                u += 1
+                current_word = packed_data[p]
             
-            i = i + 1
+            p = p + 1
             
             # is 14th bit set
             if (current_word >> 14) & 1 == 1:
@@ -148,7 +150,8 @@ class PC():
                 if repeats <= 8:
                     for j in range(repeats+1):
                         #repeat two bytes from output
-                        unpacked_data = unpacked_data + unpacked_data[head+(2*j)-location-2].to_bytes(1, 'little') + unpacked_data[head+(2*j)-location-1].to_bytes(1, 'little')
+                        unpacked_data[u] = unpacked_data[head+(2*j)-location-2].to_bytes(1, 'little') + unpacked_data[head+(2*j)-location-1].to_bytes(1, 'little')
+                        u += 1
 
             else:
                 # get 13 bits from last pixel
@@ -161,12 +164,14 @@ class PC():
                 current_word = current_word >> 2
 
                 for j in range(current_word):
-                    unpacked_data = unpacked_data + b'\x00\x00'
+                    unpacked_data[u] + b'\x00\x00'
+                    u += 1
 
                 if fill == 2:
-                    unpacked_data = unpacked_data + b'\x00\x00'
+                    unpacked_data[u] + b'\x00\x00'
+                    u += 1
         
-        return unpacked_data
+        return b''.join(unpacked_data)
         
     # TODO fix
     def __pack(self) -> bytes:
