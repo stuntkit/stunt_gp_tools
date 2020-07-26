@@ -202,17 +202,12 @@ class PC():
                     count = current_count
                     location = j
                     
-                if count == 8:
+                if count == 9:
                     break
 
             if count > 1: #it's only viable for more than 1 pixel
                 #pack data
                 package = 0b0100000000000000
-                if count > 9:
-                    print(count)
-                    raise Exception('too much')
-                if location > 2048:
-                    raise Exception('too far')
                 package += (count-2) << 11
                 package += location-1
                 packed_data.append(package)
