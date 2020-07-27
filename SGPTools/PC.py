@@ -4,16 +4,12 @@
 import os
 import sys
 
-#import pandas as pd
-#import numpy as np
-
 # files
 import pathlib
-#from glob import glob
 
 from PIL import Image # type: ignore
 
-#binary
+# binary
 import struct
 
 #TODO check if size is at least 1x1
@@ -187,42 +183,41 @@ class PC():
         # TODO add some abstraction, this is ugly!
         length = len(pixels)
         while u < length:
-            # count repeating pixels
-            # location can be max 2^11 -1 = 2047
-            # count can be between 2-10
-            count = 0
-            location = 0
-            for j in range(min(u, 2048), 0, -1):#range(1, min(u + 1, 2049)):
-                current_count = 0
-                # while current_count < 8 and u + current_count < length and u - j + current_count < u and (pixels[u - j + current_count] == pixels[u + current_count]):
-                while current_count < 9 and u + current_count + 1 < length and pixels[u - j + current_count] == pixels[u + current_count]:
-                    current_count += 1
-                    # print(u, j, current_count)
-                
-                if current_count > count:
-                    # print(u, j, current_count)
-                    count = current_count
-                    location = j
-                    
-                if count == 9:
-                    break
-
-            if count > 1: #it's only viable for more than 1 pixel
-                #pack data
-                package = 0b0100000000000000
-                package += (count-2) << 11
-                package += location-1
-                packed_data[p] = package
-                p += 1
-                u += count
-            else:
-                if (pixels[u] & (1 << 15) ) >> 15 == 0:
+            if (pixels[u] & (1 << 15) ) >> 15 == 0:
                     # if alpha is set
                     count = 1
                     # it should split after 16384 pixels
                     while u + count + 1 < length and pixels[u + count] == 0 and count < 16383:
                         count += 1
                     packed_data[p] = count
+                    p += 1
+                    u += count
+                    
+            else:
+                # count repeating pixels
+                # location can be max 2^11 -1 = 2047
+                # count can be between 2-10
+                count = 0
+                location = 0
+
+                j = min(u, 2048)
+                while j > 0: 
+                    current_count, current_location = self.__pack_loop(pixels, length, j, u)
+                    
+                    if current_count > count:
+                        count = current_count
+                        location = j
+                        if count == 9:
+                            break
+                    j -= current_count + 1
+
+
+                if count > 1: #it's only viable for more than 1 pixel
+                    #pack data
+                    package = 0b0100000000000000
+                    package += (count-2) << 11
+                    package += location-1
+                    packed_data[p] = package
                     p += 1
                     u += count
                 else:
@@ -236,6 +231,20 @@ class PC():
         packed_data = b''.join([n.to_bytes(2, 'little') for n in packed_data])
         packed_data += b'\00\00'
         return packed_data
+        
+    @staticmethod
+    def __pack_loop(pixels, length, j, u):
+        current_count = 0
+        location = 0
+        # while current_count < 8 and u + current_count < length and u - j + current_count < u and (pixels[u - j + current_count] == pixels[u + current_count]):
+        while current_count < 9 and u + current_count + 1 < length and pixels[u - j + current_count] == pixels[u + current_count]:
+            current_count += 1
+        
+        #if current_count > count:
+        #    count = current_count
+        #    location = j
+
+        return current_count, location
 
     @staticmethod
     def __convert_colours(data, width: int, height: int):
