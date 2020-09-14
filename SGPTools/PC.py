@@ -26,6 +26,8 @@ class PC():
         new_pc = cls()
         with open(filename, 'rb') as pc_file:
             new_pc.__magic = pc_file.read(4)
+            if new_pc.__magic != b'TM!\x1a':
+                return None
             new_pc.__unknown = pc_file.read(2)
             new_pc.__width = struct.unpack("<H",pc_file.read(2))[0]
             new_pc.__height = struct.unpack("<H",pc_file.read(2))[0]
