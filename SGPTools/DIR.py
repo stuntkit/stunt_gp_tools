@@ -12,7 +12,6 @@ from typing import List, Dict, Optional, BinaryIO
 
 #binary
 import struct
-# from SGPTools.FileEntry import FileEntry
 
 class DIR(dict):
 
