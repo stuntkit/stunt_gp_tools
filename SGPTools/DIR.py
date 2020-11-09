@@ -80,8 +80,7 @@ class DIR(dict):
         folder = Path(folder_name)
         for r, d, f in os.walk(folder):
             for filename in f:
-                file_folder = Path(*Path(r).parts[1:])
-                # TODO fix this, won't work properly for folders not placed next to the script
+                file_folder = Path(r).relative_to(folder)
                 filename_in_archive = str(file_folder/filename)
                 # It's weird how all systems except Windows uses slash
                 filename_in_archive = filename_in_archive.replace('/', '\\')
