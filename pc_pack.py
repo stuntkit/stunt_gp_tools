@@ -10,6 +10,7 @@ from SGPTools import PC
 parser = argparse.ArgumentParser()
 parser.add_argument("filename", help="name of the png file")
 parser.add_argument("-o", "--output", help="name of the output file")
+parser.add_argument("-u", "--uncompressed", action="store_true", help="Don't compress resulting  pc file")
 
 
 def main():
@@ -24,7 +25,11 @@ def main():
     print(output)
     if args.output:
         output = args.output
-    pc.to_pc(output)
+
+    compress = True
+    if args.uncompressed:
+        compress = False
+    pc.to_pc(output, compress)
 
 if __name__ == "__main__":
     main()

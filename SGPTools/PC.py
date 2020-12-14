@@ -74,14 +74,14 @@ class PC():
         return new_pc
    
     
-    def to_pc(self, filename: str):
-        packed = self.__pack()
+    def to_pc(self, filename: str, compress = True):
         with open(filename, 'wb') as pc_file:
             pc_file.write(self.__magic)
             pc_file.write(self.__unknown)
             pc_file.write(self.__width.to_bytes(2, 'little'))
             pc_file.write(self.__height.to_bytes(2, 'little'))
-            pc_file.write(packed)
+            #pc_file.write(packed)
+            self.__pack(pc_file, compress)
         pass
     
     def to_png(self, filename: str):
@@ -171,82 +171,67 @@ class PC():
         return b''.join(unpacked_data)
         
     # TODO fix
-    def __pack(self) -> bytes:
-        pixels = memoryview(self.__data).cast('H')
-
-        # adding to array is faster than appending, so we take big enough array that will be cut to size later
-        packed_data = [0] * len(pixels)
+    def __pack(self, f, compress = False):
+        pixels_t = memoryview(self.__data).cast('H')
+        pixels = [i for i in pixels_t]
         #1st pixel is passed as-is
-        packed_data[0] = pixels[0]
+        f.write(pixels[0].to_bytes(2, "little"))
 
         # skip 1st pixel
         u = 1
-        p = 1
         # TODO add some abstraction, this is ugly!
         length = len(pixels)
         while u < length:
-            if (pixels[u] & (1 << 15) ) >> 15 == 0:
-                    # if alpha is set
-                    count = 1
-                    # it should split after 16384 pixels
-                    while u + count + 1 < length and pixels[u + count] == 0 and count < 16383:
-                        count += 1
-                    packed_data[p] = count
-                    p += 1
-                    u += count
-                    
+            # check if pixlex is trasparent (15th bit is unset)
+            if pixels[u] < 0x8000:
+                count = 1
+                # it should split after 16384 pixels
+                # TODO coult all pixels at once and then cut?
+                # Yeah, I could do that but there are bigger time loses with non-transparent pixels
+                while u + count + 1 < length and pixels[u + count] == 0 and count < 16383:
+                    count += 1
+                f.write(count.to_bytes(2, "little"))
+                u += count
+
+            # non-transparent pixels        
             else:
-                # count repeating pixels
-                # location can be max 2^11 -1 = 2047
-                # count can be between 2-10
-                count = 0
-                location = 0
+                if compress:
+                    # count repeating pixels
+                    # location can be max 2^11 -1 = 2047
+                    # count can be between 2-10
+                    count = 0
+                    location = 0
 
-                j = min(u, 2048)
-                while j > 0: 
-                    current_count, current_location = self.__pack_loop(pixels, length, j, u)
-                    
-                    if current_count > count:
-                        count = current_count
-                        location = j
-                        if count == 9:
-                            break
-                    j -= current_count + 1
+                    j = min(u, 2048)
+                    while j > 0: 
+                        current_count = 0
+                        while u + 1 + current_count < length and pixels[u - j + current_count] == pixels[u + current_count]:
+                            current_count += 1
+                        
+                        if current_count > count:
+                            count = current_count
+                            location = j
+                            if count >= 9:
+                                break
+                        j -= current_count + 1
 
-
-                if count > 1: #it's only viable for more than 1 pixel
-                    #pack data
-                    package = 0b0100000000000000
-                    package += (count-2) << 11
-                    package += location-1
-                    packed_data[p] = package
-                    p += 1
-                    u += count
+                    if count > 1: #it's only viable for more than 1 pixel
+                        #pack data
+                        while count > 1:
+                            currently_counted = min(9, count)
+                            package = 0b0100000000000000 | ((currently_counted-2) << 11) | (location-1)
+                            f.write(package.to_bytes(2, "little"))
+                            u += currently_counted
+                            count -= currently_counted
+                    else:
+                        # stream data
+                        f.write(pixels[u].to_bytes(2, "little"))
+                        u += 1
                 else:
                     # stream data
-                    packed_data[p] = pixels[u]
-                    p += 1
+                    f.write(pixels[u].to_bytes(2, "little"))
                     u += 1
-
-        terminator = packed_data.index(0)
-        packed_data = packed_data[:terminator]
-        packed_data = b''.join([n.to_bytes(2, 'little') for n in packed_data])
-        packed_data += b'\00\00'
-        return packed_data
-        
-    @staticmethod
-    def __pack_loop(pixels, length, j, u):
-        current_count = 0
-        location = 0
-        # while current_count < 8 and u + current_count < length and u - j + current_count < u and (pixels[u - j + current_count] == pixels[u + current_count]):
-        while current_count < 9 and u + current_count + 1 < length and pixels[u - j + current_count] == pixels[u + current_count]:
-            current_count += 1
-        
-        #if current_count > count:
-        #    count = current_count
-        #    location = j
-
-        return current_count, location
+        f.write(b'\00\00')
 
     @staticmethod
     def __convert_colours(data, width: int, height: int):
