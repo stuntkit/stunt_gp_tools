@@ -152,22 +152,13 @@ class PC():
 
             else:
                 # get 13 bits from last pixel
-                current_word = (current_word & 0x3FFF) * 4
-
                 if current_word == 0:
                     break
-
-                fill = (current_word ) & 3
-                current_word = current_word >> 2
 
                 for j in range(current_word):
                     unpacked_data[u] + b'\x00\x00'
                     u += 1
 
-                if fill == 2:
-                    unpacked_data[u] + b'\x00\x00'
-                    u += 1
-    
         return b''.join(unpacked_data)
         
     # TODO fix
