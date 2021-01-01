@@ -6,7 +6,30 @@ These tools will help you understand, unpack and edit Stunt GP files
 
 Original thread: [https://forum.xentax.com/viewtopic.php?f=16&t=16944&p=160266#p160266](https://forum.xentax.com/viewtopic.php?f=16&t=16944&p=160266#p160266)
 
+Check out [the wiki](https://sgp.halamix2.pl) for more information about the game and its file formats.
 
-<!--Every address and size is in little endian format, many values are 4 bytes aligned/padded-->
+## Compilation:
+```
+go build cmd/pc_pack/pc_pack.go
+go build cmd/pc_unpack/pc_unpack.go
+```
+Or grab compiled .exe [here](https://github.com/Halamix2/stunt_gp_formats/releases)
 
-Check out [the wiki](https://github.com/Halamix2/stunt_gp_formats/wiki)
+## Usage:
+You can also drag and drop files on `pc_pack` or `pc_unpack`
+
+```bash
+./pc_pack mini.png
+
+./pc_pack mini.png -o output.pc
+
+# pack Dreamcast texture
+./pc_pack mini.png --dc
+./pc_pack mini.png -o output.dc --dc
+
+# unpack texture (including Dreamcast)
+./pc_unpack mini.pc
+
+./pc_unpack mini.pc -o output.png
+```
+
