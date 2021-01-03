@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	_ "github.com/halamix2/stunt_gp_tools/pkg/texture"
+	"github.com/halamix2/stunt_gp_tools/pkg/texture"
 	"github.com/spf13/cobra"
 )
 
@@ -72,6 +72,8 @@ var rootCmd = &cobra.Command{
 			err = jpeg.Encode(outputFile, img, &o)
 		case ".png":
 			err = png.Encode(outputFile, img)
+		case ".pc":
+			err = texture.Encode(outputFile, img)
 		default:
 			err = errors.New("unknown output format")
 		}
