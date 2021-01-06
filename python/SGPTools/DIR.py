@@ -125,8 +125,8 @@ class DIR(dict):
                     descriptor_table[hash] = filename
                 else:
                     s = descriptor_table[hash]
-                    while s in next_file: 
-                        s = next_file[filename]
+                    while s in next_file:
+                        s = next_file[s]
                     next_file[s] = filename
 
             archive_size = table_offset + descriptor_offset
