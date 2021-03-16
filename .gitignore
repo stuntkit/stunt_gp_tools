@@ -17,6 +17,8 @@
 # Stunt GP files
 
 *.pc
+*.dc
+*.ps2
 *.png
 *.jpg
 *.PMD
