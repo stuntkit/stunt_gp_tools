@@ -4,8 +4,7 @@
 *.dll
 *.so
 *.dylib
-/pc_pack
-/pc_unpack
+/bin
 
 # Test binary, built with `go test -c`
 *.test
