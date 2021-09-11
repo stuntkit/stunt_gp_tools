@@ -19,9 +19,7 @@ jobs:
         go-version: 1.16
 
     - name: Build
-      run: |
-        go build cmd/pc_pack/pc_pack.go
-        go build cmd/pc_unpack/pc_unpack.go
+      run: make build
 
     - name: Test
-      run: go test -v ./...
+      run: make test
