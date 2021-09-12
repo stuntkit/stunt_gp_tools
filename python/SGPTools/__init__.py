@@ -1,3 +1,2 @@
-__all__ = ['pc' , 'DIR']
+__all__ = ["DIR"]
 from SGPTools.DIR import DIR
-from SGPTools.PC import PC
