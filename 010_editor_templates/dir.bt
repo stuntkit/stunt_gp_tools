@@ -1,0 +1,57 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.dir,*.wad
+//  ID Bytes: 44 49 52 1A // DIR\1A
+//   History: 
+//------------------------------------------------
+
+struct File {
+    int nextHash;
+    int dataOffset;
+    int fileSize;
+    string filename <fgcolor=0x00DD00>;
+
+    local int currentPosition = FTell();
+
+    FSeek(dataOffset);
+    byte data[fileSize];
+    FSeek(currentPosition);
+};
+
+struct {
+    char magic[4];
+    if (magic != "DIR\x1A") {
+        Printf( "Wrong magic, expected \"DIR\\x1A\", got %s", magic);
+    }
+    int fileSize;
+    int directoryAddress;
+} header;
+
+FSeek(header.directoryAddress);
+
+struct {
+    int header;
+    if (header != 0xa) {
+        Printf( "Wrong header, expected \"0A 00 00 00\", got %i", header);
+    }
+    int hashTable[1024];
+} directory;
+
+local int i = 0;
+for (i = 0; i < 1024; i++) {
+    if(directory.hashTable[i] != 0) {
+        FSeek(header.directoryAddress + directory.hashTable[i]);
+        File files <read=readFile>;
+    }
+}
+
+string readFile(File &f) {
+    string name;
+    return f.filename;
+};

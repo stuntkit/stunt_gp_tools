@@ -1,0 +1,103 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: Game
+// File Mask: *.pc,*.dc,*.ps2
+//  ID Bytes: 54 4D 21 1A // TM!\x1A
+//   History: 
+//------------------------------------------------
+LittleEndian();
+
+// See also https://sgp.halamix2.pl/wiki/Texture_format
+// TODO version to enum
+
+typedef enum <ushort> {
+    VER_PALETTED = 2,
+    VER_PC,
+    VER_DREAMCAST,
+    VER_PS
+} Version;
+
+typedef struct {
+    uint alpha;
+    uint red;
+    uint green;
+    uint blue;
+} Colour;
+
+typedef struct {
+    short blue : 5;
+    short green : 5;
+    short red : 5;
+    short alpha : 1;
+} Pixel <read=pixelRead>;
+
+string pixelRead(Pixel &p) {
+    string colour;
+    SPrintf(colour, "rgba(%u, %u, %u, %u)",p.red, p.green, p.blue, p.alpha);
+    return colour;
+}
+
+typedef struct {
+    ushort instruction : 2;
+    ushort length : 3;
+    ushort offset : 11;
+    
+} PackedPixels <read=PackedPixelsRead>;
+
+string PackedPixelsRead(PackedPixels &p) {
+    string info;
+    SPrintf(info, "length = %u, offset = %u", p.length, p.offset);
+    return info;
+}
+
+typedef struct {
+    ushort instruction :2;
+    ushort length :14;
+} PackedAlpha <read=packedAlphaRead>;
+
+string packedAlphaRead(PackedAlpha &p) {
+    string length;
+    SPrintf(length, "length = %u",p.length);
+    return length;
+}
+
+struct {
+    char magic[4];
+    if (magic != "TM!\x1A") {
+        Printf( "Wrong magic, expected \"TM!\\x1A\", got %s", magic);
+    }
+    Version version;
+    ushort width;
+    ushort height;
+} header;
+
+if (header.version == VER_PALETTED) {
+    //palette size
+    short coloursNumber;
+    Colour colours[coloursNumber];
+    byte pixels[header.width * header.height];
+} else {
+    Pixel firstPixel;
+
+
+    // green - uncompressed data
+    // red - compressed alpha
+    local ushort command;
+    do {
+        command = ReadUShort();
+        if (command >= 0x8000) {
+            Pixel commands <bgcolor=0x00ff00>;
+        } else if (command >= 0x4000) {
+            PackedPixels commands;
+        } else if (command > 0) {
+            PackedAlpha commands <bgcolor=0x0000ff>;
+        } else {
+            ushort terminator;
+        };
+    } while (command != 0);
+};
