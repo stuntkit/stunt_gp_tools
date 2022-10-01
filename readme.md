@@ -13,7 +13,7 @@ Check out [the wiki](https://sgp.halamix2.pl) for more information about the gam
 go build cmd/pc_pack/pc_pack.go
 go build cmd/pc_unpack/pc_unpack.go
 ```
-Or grab compiled .exe [here](https://github.com/Halamix2/stunt_gp_formats/releases)
+Or grab compiled .exe [here](https://github.com/StuntKit/stunt_gp_formats/releases)
 
 ## Usage:
 You can also drag and drop files on `pc_pack` or `pc_unpack`
