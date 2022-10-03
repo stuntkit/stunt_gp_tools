@@ -3,20 +3,17 @@
 #   tests: false
 output:
   sort-results: true
-linters-settings:
-  revive:
+# linters-settings:
+#   revive:
 linters:
   enable:
-    - deadcode
     - errcheck
     - gosimple
     - govet
     - ineffassign
     - staticcheck
-    - structcheck
     - typecheck
     - unused
-    - varcheck
     - revive
 issues:
   # To list all excluded by default patterns execute `golangci-lint run --help`.
