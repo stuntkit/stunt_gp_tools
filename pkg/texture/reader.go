@@ -1,3 +1,4 @@
+// Package texture handles Stunt GP texture conversion
 package texture
 
 import (

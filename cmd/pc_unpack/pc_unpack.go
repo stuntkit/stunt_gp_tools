@@ -1,3 +1,9 @@
+/*
+Pc_unpack converts Stunt GP textures to one of the more popular formats.
+
+This program accepts PC, DC and PS2 textures.
+It can output jpg or png files.
+*/
 package main
 
 import (
