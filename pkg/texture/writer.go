@@ -8,7 +8,6 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/disintegration/imaging"
 	morton "github.com/gojuno/go.morton"
 )
 
@@ -62,14 +61,12 @@ func (e *encoder) convertData() {
 	e.d = make([]uint16, e.m.Bounds().Dx()*e.m.Bounds().Dy()) // initialize a slice of dy slices
 
 	if e.version == 4 {
-		e.m = imaging.Rotate90(e.m)
-		e.m = imaging.FlipV(e.m)
 		m := morton.Make64(2, uint64(math.Log2(float64(e.m.Bounds().Dy()))))
 
 		for y := 0; y < e.m.Bounds().Dy(); y++ {
 			for x := 0; x < e.m.Bounds().Dx(); x++ {
 				mCoord := m.Unpack(int64((y * e.m.Bounds().Dy()) + x))
-				e.d[x+(y*e.m.Bounds().Dy())] = argb1555(e.m.At(int(mCoord[0]), int(mCoord[1])))
+				e.d[x+(y*e.m.Bounds().Dy())] = argb1555(e.m.At(int(mCoord[1]), int(mCoord[0])))
 			}
 		}
 	} else {
