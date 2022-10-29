@@ -1,6 +1,6 @@
 module github.com/halamix2/stunt_gp_tools
 
-go 1.18
+go 1.19
 
 require (
 	github.com/gojuno/go.morton v0.0.0-20180202102823-94709bd871ce

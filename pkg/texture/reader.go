@@ -46,10 +46,6 @@ func getWord(r io.Reader) (uint16, error) {
 	return binary.LittleEndian.Uint16(buf), nil
 }
 
-func countIndex(i int, width uint16) int {
-	return int(width)*(i%int(width)) + int(i/int(width))
-}
-
 func untwiddle(rgba, rgba2 *image.RGBA, x, y uint16, i int64) {
 	pos := (int(y) * rgba.Bounds().Dy()) + int(x)
 	p := rgba2.Pix[pos*4 : 4*(pos+1)]
