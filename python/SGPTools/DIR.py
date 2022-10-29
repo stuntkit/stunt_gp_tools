@@ -95,13 +95,13 @@ class DIR(dict):
             # note - this is just rerite of C++ code that I made later, this code should have improved quality, although I haven't put much thought into polishing it
 
             # TODO consolidate all these dicts
-            file_offsets: Dict[str, int] = dict()
-            descriptor_offsets: Dict[str, int] = dict()
+            file_offsets: Dict[str, int] = {}
+            descriptor_offsets: Dict[str, int] = {}
 
             descriptor_table: List[str] = [""] * 1024
-            next_file: Dict[str, str] = dict()
+            next_file: Dict[str, str] = {}
 
-            hashes: Dict[str, int] = dict()
+            hashes: Dict[str, int] = {}
 
             # where is directory table header
             table_offset = 12
