@@ -6,8 +6,6 @@ import sys
 import argparse
 
 import struct
-
-import matplotlib.pyplot as plt # type: ignore
 from networkx import nx # type: ignore
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)

@@ -2,7 +2,6 @@
 # coding=utf-8
 
 import os
-import sys
 
 # files
 from pathlib import Path
