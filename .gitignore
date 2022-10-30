@@ -16,6 +16,8 @@
 .vscode
 .mypy_cache
 
+# Snyk plugin files
+.dccache
 
 # Stunt GP files
 
@@ -32,3 +34,4 @@ meshdata/*
 out/*
 
 **/__pycache__/*
+
