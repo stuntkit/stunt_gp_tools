@@ -55,7 +55,7 @@ func untwiddle(rgba, rgba2 *image.RGBA, x, y uint16, i int64) {
 
 func (d decoder) readPalette() error {
 	for i := 0; i < len(d.palette); i++ {
-		colour := color.RGBA{}
+		colour := color.NRGBA{}
 		tmp := make([]byte, 4)
 		d.r.Read(tmp)
 		colour.R = tmp[0]
