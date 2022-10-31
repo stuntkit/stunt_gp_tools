@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/gojuno/go.morton v0.0.0-20180202102823-94709bd871ce
-	github.com/spf13/cobra v1.6.0
+	github.com/spf13/cobra v1.6.1
 )
 
 require (
