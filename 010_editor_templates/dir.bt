@@ -10,11 +10,12 @@
 //  ID Bytes: 44 49 52 1A // DIR\1A
 //   History: 
 //------------------------------------------------
+LittleEndian();
 
-struct File {
+typedef struct {
     int nextHash;
-    int dataOffset;
-    int fileSize;
+    uint dataOffset;
+    uint fileSize;
     string filename <fgcolor=0x00DD00>;
 
     local int currentPosition = FTell();
@@ -22,26 +23,28 @@ struct File {
     FSeek(dataOffset);
     byte data[fileSize];
     FSeek(currentPosition);
-};
+} File;
 
-struct {
+typedef struct {
     char magic[4];
     if (magic != "DIR\x1A") {
         Printf( "Wrong magic, expected \"DIR\\x1A\", got %s", magic);
     }
-    int fileSize;
-    int directoryAddress;
-} header;
+    uint fileSize;
+    uint directoryAddress;
+} Header;
 
-FSeek(header.directoryAddress);
-
-struct {
+typedef struct {
     int header;
     if (header != 0xa) {
         Printf( "Wrong header, expected \"0A 00 00 00\", got %i", header);
     }
     int hashTable[1024];
-} directory;
+} Directory;
+
+Header header;
+FSeek(header.directoryAddress);
+Directory directory;
 
 local int i = 0;
 for (i = 0; i < 1024; i++) {
@@ -55,3 +58,5 @@ string readFile(File &f) {
     string name;
     return f.filename;
 };
+
+
