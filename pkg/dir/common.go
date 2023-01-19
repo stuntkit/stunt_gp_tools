@@ -1,6 +1,8 @@
 // Package dir implements functions used to manipulate Worms Armageddon / Stunt GP .dir / .wad files.
 package dir
 
+const testDir = "test_data/"
+
 // Dir is a base representation of a Dir archive
 type Dir map[string][]byte
 
