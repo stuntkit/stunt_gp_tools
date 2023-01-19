@@ -29,7 +29,7 @@ func TestToDir(t *testing.T) {
 				t.Errorf("Couldn't load test datat: %s", err)
 			}
 			var buf bytes.Buffer
-			test.files.ToWriter(&buf)
+			err = test.files.ToWriter(&buf)
 			if err != nil {
 				t.Errorf("ToWriter failed: %s", err)
 			}

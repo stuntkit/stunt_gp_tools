@@ -57,7 +57,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		err = os.MkdirAll(outputDirectory, 0770)
+		err = os.MkdirAll(outputDirectory, 0750)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Couldn't create %s path: %s\n", outputDirectory, err)
 			os.Exit(1)
@@ -76,7 +76,7 @@ func saveFiles(dirFile dir.Dir) error {
 		archFilename = strings.ReplaceAll(archFilename, "\\", "/")
 		outPath := filepath.Join(outputDirectory, archFilename)
 
-		err := os.MkdirAll(path.Dir(outPath), 0770)
+		err := os.MkdirAll(path.Dir(outPath), 0750)
 		if err != nil {
 			return fmt.Errorf("couldn't create %s path: %s", outPath, err)
 		}

@@ -46,9 +46,9 @@ func (d *Dir) ToDir(filename string) error {
 	return f.Close()
 }
 
-// ToFile saves Dir archive to a file object
-func (d Dir) ToWriter(f io.Writer) error {
-	w := writer{Dir: &d}
+// ToWriter saves Dir archive to a file object
+func (d *Dir) ToWriter(f io.Writer) error {
+	w := writer{Dir: d}
 	w.keys = w.getSortedKeys()
 	w.prepareMetadata()
 	w.prepareDescriptorTable()
@@ -61,9 +61,9 @@ func (d Dir) ToWriter(f io.Writer) error {
 	return nil
 }
 
-func (d Dir) getSortedKeys() []string {
+func (d *Dir) getSortedKeys() []string {
 	keys := make([]string, 0)
-	for k := range d {
+	for k := range *d {
 		keys = append(keys, k)
 	}
 
@@ -77,7 +77,7 @@ func (w *writer) prepareMetadata() {
 	w.fh = make(map[string]fileHelper)
 
 	// data should be padded to nearest 4 bytes
-	// luckilly the Dir header is 12 bytes
+	// luckily the Dir header is 12 bytes
 	for _, k := range w.keys {
 		fh := w.fh[k]
 		fh.dataOffset = uint32(12 + dataSize)
@@ -126,7 +126,7 @@ func (w *writer) prepareDescriptorTable() {
 	}
 }
 
-func (w writer) writeAll(f io.Writer) error {
+func (w *writer) writeAll(f io.Writer) error {
 	if err := w.writeHeader(f); err != nil {
 		return err
 	}
@@ -146,7 +146,7 @@ func (w writer) writeAll(f io.Writer) error {
 	return nil
 }
 
-func (w writer) writeHeader(f io.Writer) error {
+func (w *writer) writeHeader(f io.Writer) error {
 	magic := []byte("DIR\x1A")
 	dirOffset := 12 + w.dataSize
 	fileSize := dirOffset + w.descriptorsSize
@@ -163,7 +163,7 @@ func (w writer) writeHeader(f io.Writer) error {
 	return nil
 }
 
-func (w writer) writeData(f io.Writer) error {
+func (w *writer) writeData(f io.Writer) error {
 	fileFooter := []byte("\x1A\x00")
 	for _, k := range w.keys {
 		fh := w.fh[k]
@@ -181,7 +181,7 @@ func (w writer) writeData(f io.Writer) error {
 	return nil
 }
 
-func (w writer) writeDirectory(f io.Writer) error {
+func (w *writer) writeDirectory(f io.Writer) error {
 	directoryHeader := []byte("\x0A\x00\x00\x00")
 	if _, err := f.Write(directoryHeader); err != nil {
 		return err
@@ -202,7 +202,7 @@ func (w writer) writeDirectory(f io.Writer) error {
 	return nil
 }
 
-func (w writer) writeEntries(f io.Writer) error {
+func (w *writer) writeEntries(f io.Writer) error {
 	for _, k := range w.keys {
 		fh := w.fh[k]
 		data := (*w.Dir)[k]

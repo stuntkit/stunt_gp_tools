@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/halamix2/stunt_gp_tools/pkg/dir"
-	_ "github.com/halamix2/stunt_gp_tools/pkg/dir"
 	"github.com/spf13/pflag"
 )
 
