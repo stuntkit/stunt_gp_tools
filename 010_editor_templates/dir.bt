@@ -10,6 +10,7 @@
 //  ID Bytes: 44 49 52 1A // DIR\1A
 //   History: 
 //------------------------------------------------
+LittleEndian();
 
 struct File {
     int nextHash;

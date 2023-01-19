@@ -6,10 +6,15 @@ COVER_FILE=cover.out
 
 all: build test vet cover
 
+build_all: build_linux_64 build_windows_32
+
 build:
 	go build  -ldflags "-s -w" -o ${OUTPUT_DIR} ./cmd/...
 
-build_windows:
+build_linux_64:
+	GOOS=linux GOARCH=AMD64 go build  -ldflags "-s -w" -o ${OUTPUT_DIR} ./cmd/...
+
+build_windows_32:
 	GOOS=windows GOARCH=386 go build  -ldflags "-s -w" -o ${OUTPUT_DIR} ./cmd/...
 test:
 	go test ./cmd/... ./pkg/...
