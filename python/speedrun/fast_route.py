@@ -75,6 +75,7 @@ def main():
     if not os.path.exists(filename) or not os.path.isfile(filename):
         print("File {} not found".format(filename), file=sys.stderr)
     else:
+        # deepcode ignore PT: cli tool
         with open(filename, "rb") as save_file:
             # skip first one, because it's unused
             save_file.seek(0x114 + 0x20)
