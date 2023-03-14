@@ -6,7 +6,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -63,6 +62,7 @@ func main() {
 			os.Exit(1)
 		}
 
+		// deepcode ignore PT: this is a CLI tool
 		err = saveFiles(dirFile)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Couldn't save files: %s\n", err)
@@ -76,11 +76,12 @@ func saveFiles(dirFile dir.Dir) error {
 		archFilename = strings.ReplaceAll(archFilename, "\\", "/")
 		outPath := filepath.Join(outputDirectory, archFilename)
 
-		err := os.MkdirAll(path.Dir(outPath), 0750)
+		err := os.MkdirAll(filepath.Dir(outPath), 0750)
 		if err != nil {
 			return fmt.Errorf("couldn't create %s path: %s", outPath, err)
 		}
 
+		// deepcode ignore PT: this is a CLI tool
 		err = os.WriteFile(outPath, archData, 0666)
 		if err != nil {
 			return fmt.Errorf("couldn't save %s file: %s", outPath, err)
