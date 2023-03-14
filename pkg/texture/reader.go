@@ -106,15 +106,11 @@ func (d decoder) decode() error {
 			}
 			unpacked += repeats
 
-		} else {
-			if ((word >> 15) & 1) == 0 {
-				// end reading
-				if word == 0 {
-					return nil
-				}
-				// stream transparency
-				unpacked += int(word)
+		} else if ((word >> 15) & 1) == 0 {
+			if word == 0 {
+				return nil
 			}
+			unpacked += int(word)
 		}
 	}
 	return FormatError("pc: too many bytes")
