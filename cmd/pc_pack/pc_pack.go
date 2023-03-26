@@ -17,7 +17,7 @@ import (
 	"strings"
 
 	"github.com/halamix2/stunt_gp_tools/pkg/texture"
-	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // flags
@@ -26,31 +26,58 @@ var (
 	dreamcast, uncompressed bool
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "pack",
-	Short: "Packs image to texture format used by Stunt GP",
-	Long: `Packs image to texture format used by Stunt GP
-	It can pack to either PC or Dreamcast versions of the format
-	or make uncompressed files if the need arises.`,
-	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		inputName := args[0]
-		if outputName == "" {
+func parseFlags() {
+	pflag.StringVarP(&outputName, "output", "o", "", "name of the output file")
+	pflag.BoolVarP(&dreamcast, "dreamcast", "d", false, "Packs texture for use in Dreamcast version ")
+	pflag.BoolVarP(&uncompressed, "uncompressed", "u", false, "Do not compress texture")
+	pflag.Parse()
+}
+
+func usage() {
+	fmt.Println("Packs image to texture format used by Stunt GP")
+	// TODO
+	//fmt.Println("Usage:\npc_pack ")
+	fmt.Println("Flags:")
+	pflag.PrintDefaults()
+}
+
+func main() {
+	parseFlags()
+	args := pflag.Args()
+	if len(args) < 1 {
+		usage()
+		os.Exit(1)
+	}
+
+	if outputName != "" && len(args) > 1 {
+		fmt.Println("Output name can only be used with one input file")
+		usage()
+		os.Exit(1)
+	}
+
+	for _, inputName := range args {
+		if outputName == "" || len(args) > 1 {
 			outputName = strings.TrimSuffix(inputName, filepath.Ext(inputName)) + ".pc"
 		}
 
 		fmt.Printf("Hi, today I'll pack %s...\n", inputName)
 
+		// deepcode ignore PT: this is a CLI tool
 		file, err := os.Open(inputName)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Couldn't open file %s!\n", inputName)
 			os.Exit(3)
 		}
-		defer file.Close()
 
 		img, _, err := image.Decode(file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Couldn't read image file %s!\n", inputName)
+			os.Exit(4)
+		}
+
+		err = file.Close()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Couldn't close image file %s: %s\n", inputName, err)
 			os.Exit(4)
 		}
 
@@ -59,37 +86,23 @@ var rootCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Couldn't create output image file %s!\n", outputName)
 			os.Exit(4)
 		}
-		defer outputFile.Close()
 
+		textureFormat := texture.FPC
+		if dreamcast {
+			textureFormat = texture.FDreamcast
+		}
 		fmt.Printf("packing %s...\n", outputName)
-		enc := texture.Encoder{Compress: !uncompressed, Dreamcast: dreamcast}
+		enc := texture.Encoder{Compress: !uncompressed, Format: textureFormat}
 		err = enc.Encode(outputFile, img)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Couldn't pack output image %s!\n", outputName)
 			os.Exit(5)
 		}
-		fmt.Println("done")
-	},
-}
 
-func main() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		err = outputFile.Close()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Couldn't close image file %s: %s\n", outputName, err)
+			os.Exit(4)
+		}
 	}
-}
-
-func init() {
-	cobra.MousetrapHelpText = ""
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.test_cobra.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().StringVarP(&outputName, "output", "o", "", "name of the output file")
-	rootCmd.Flags().BoolVarP(&dreamcast, "dreamcast", "d", false, "Packs texture for use in Dreamcast version ")
-	rootCmd.Flags().BoolVarP(&uncompressed, "uncompressed", "u", false, "Do not compress texture")
 }

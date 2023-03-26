@@ -4,8 +4,5 @@ go 1.19
 
 require (
 	github.com/gojuno/go.morton v0.0.0-20180202102823-94709bd871ce
-	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
 )
-
-require github.com/inconshreveable/mousetrap v1.0.1 // indirect

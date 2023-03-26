@@ -8,13 +8,18 @@ import (
 	"math"
 	"strconv"
 
+	// "github.com/Nykakin/quantize"
 	morton "github.com/gojuno/go.morton"
 )
 
+// func dummy() {
+// 	quantizer := quantize.NewHierarhicalQuantizer()
+// }
+
 // Encoder configures encoding Stunt GP textures
 type Encoder struct {
-	Compress  bool
-	Dreamcast bool
+	Compress bool
+	Format   int
 }
 
 type encoder struct {
@@ -81,7 +86,7 @@ func (e *encoder) convertData() {
 }
 
 func (e *encoder) writeHeader() {
-	_, e.err = io.WriteString(e.w, pcHeader)
+	_, e.err = io.WriteString(e.w, textureHeader)
 }
 
 func (e *encoder) writeVersion() {
@@ -178,7 +183,7 @@ func (e *encoder) writeEnd() {
 func Encode(w io.Writer, m image.Image) error {
 	var e Encoder
 	e.Compress = true
-	e.Dreamcast = false
+	e.Format = FPC
 	return e.Encode(w, m)
 }
 
@@ -197,7 +202,7 @@ func (enc *Encoder) Encode(w io.Writer, m image.Image) error {
 	e.enc = enc
 	e.w = w
 	e.m = m
-	if enc.Dreamcast {
+	if enc.Format == FDreamcast {
 		e.version = 4
 	} else {
 		e.version = 3
