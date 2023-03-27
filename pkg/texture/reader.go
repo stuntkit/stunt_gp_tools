@@ -244,5 +244,5 @@ func DecodeConfig(r io.Reader) (image.Config, error) {
 }
 
 func init() {
-	image.RegisterFormat("pc", textureHeader, Decode, DecodeConfig)
+	image.RegisterFormat(FormatName, textureHeader, Decode, DecodeConfig)
 }

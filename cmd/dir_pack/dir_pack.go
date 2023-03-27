@@ -48,7 +48,7 @@ func main() {
 	}
 
 	for _, inputName := range args {
-		if outputName == "" {
+		if outputName == "" || len(args) > 1 {
 			// I know, Worms uses .dir extension, but this is primarily Stunt GP program after all
 			outputName = strings.TrimSuffix(inputName, filepath.Ext(inputName)) + ".wad"
 		}

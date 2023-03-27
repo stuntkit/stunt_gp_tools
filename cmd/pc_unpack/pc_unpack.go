@@ -59,7 +59,6 @@ func main() {
 			failed = true
 		}
 		if f.IsDir() {
-			// TODO filepathwalk
 			walkFunc := getWalkFunc(&failed)
 			err := filepath.Walk(inputName, walkFunc)
 			if err != nil {
@@ -67,6 +66,7 @@ func main() {
 				failed = true
 			}
 		} else {
+			fmt.Printf("%s, %d", outputName, len(args))
 			if outputName == "" || len(args) > 1 {
 				outputName = strings.TrimSuffix(inputName, filepath.Ext(inputName)) + ".png"
 			}
@@ -85,7 +85,8 @@ func main() {
 func getWalkFunc(failed *bool) filepath.WalkFunc {
 	return func(path string, info fs.FileInfo, err error) error {
 		if !info.IsDir() {
-			err := unpackTexture(path, "")
+			outputName = strings.TrimSuffix(path, filepath.Ext(path)) + ".png"
+			err := unpackTexture(path, outputName)
 			if err != nil {
 				fail := true
 				failed = &fail
@@ -106,7 +107,11 @@ func unpackTexture(inputName, outputName string) error {
 	if err != nil {
 		return fmt.Errorf("couldn't read image file config %s: %s", inputName, err)
 	}
-	fmt.Println("Width:", config.Width, "Height:", config.Height, "Format:", format)
+	if format != texture.FormatName {
+		return nil
+	}
+
+	fmt.Printf("Unpacking %s: %dx%d\n", inputName, config.Width, config.Height)
 
 	_, err = file.Seek(0, 0)
 	if err != nil {

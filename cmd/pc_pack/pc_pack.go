@@ -63,7 +63,6 @@ func main() {
 		}
 
 		if f.IsDir() {
-			// TODO filepathwalk
 			walkFunc := getWalkFunc(&failed)
 			err := filepath.Walk(inputName, walkFunc)
 			if err != nil {
@@ -92,7 +91,8 @@ func main() {
 func getWalkFunc(failed *bool) filepath.WalkFunc {
 	return func(path string, info fs.FileInfo, err error) error {
 		if !info.IsDir() {
-			err := packTexture(path, "")
+			outputName = strings.TrimSuffix(path, filepath.Ext(path)) + ".pc"
+			err := packTexture(path, outputName)
 			if err != nil {
 				fail := true
 				failed = &fail

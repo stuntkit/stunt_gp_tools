@@ -5,6 +5,9 @@ import (
 	"io"
 )
 
+// FormatName is the name of the registered texture format
+const FormatName = "stuntGP"
+
 const textureHeader = "TM!\x1a"
 
 // TODO there's gotta be a better way
