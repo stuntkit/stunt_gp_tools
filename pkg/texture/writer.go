@@ -118,7 +118,7 @@ func (e *encoder) packLoop(len, j, u int) int {
 
 func (e *encoder) writeData() {
 	// magic here I guess
-	//write first pixel as-is
+	// write first pixel as-is
 	length := len(e.d)
 
 	e.w.Write(uint16ToBytes(uint16(e.d[0])))
@@ -127,7 +127,7 @@ func (e *encoder) writeData() {
 	for u < length {
 		// check if pixlex is trasparent (15th bit is unset)
 		if e.d[u] < 0x8000 {
-			//transparent pixels
+			// transparent pixels
 			count := 1
 			for u+count+1 < length && e.d[u+count] == 0 && count < 16383 {
 				count++

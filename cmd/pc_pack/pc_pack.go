@@ -12,6 +12,7 @@ import (
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -35,8 +36,6 @@ func parseFlags() {
 
 func usage() {
 	fmt.Println("Packs image to texture format used by Stunt GP")
-	// TODO
-	//fmt.Println("Usage:\npc_pack ")
 	fmt.Println("Flags:")
 	pflag.PrintDefaults()
 }
@@ -57,18 +56,29 @@ func main() {
 	}
 
 	for _, inputName := range args {
-		f, _ := os.Stat(inputName)
+		f, err := os.Stat(inputName)
+		if err != nil {
+			fmt.Printf("Failed to get info about %s: %s", inputName, err)
+			failed = true
+		}
+
 		if f.IsDir() {
 			// TODO filepathwalk
+			walkFunc := getWalkFunc(&failed)
+			err := filepath.Walk(inputName, walkFunc)
+			if err != nil {
+				fmt.Printf("Failed to pack dir %s: %s", inputName, err)
+				failed = true
+			}
 		} else {
 
 			if outputName == "" || len(args) > 1 {
 				outputName = strings.TrimSuffix(inputName, filepath.Ext(inputName)) + ".pc"
 			}
 
-			err := unpackTexture(inputName, outputName)
+			err := packTexture(inputName, outputName)
 			if err != nil {
-				fmt.Printf("Failed to unpack %s: %s", inputName, err)
+				fmt.Printf("Failed to pack %s: %s", inputName, err)
 				failed = true
 			}
 
@@ -79,9 +89,20 @@ func main() {
 	}
 }
 
-func unpackTexture(inputName, outputName string) error {
-	fmt.Printf("Hi, today I'll pack %s...\n", inputName)
+func getWalkFunc(failed *bool) filepath.WalkFunc {
+	return func(path string, info fs.FileInfo, err error) error {
+		if !info.IsDir() {
+			err := packTexture(path, "")
+			if err != nil {
+				fail := true
+				failed = &fail
+			}
+		}
+		return nil
+	}
+}
 
+func packTexture(inputName, outputName string) error {
 	// file deepcode ignore PT: This is CLI tool, this is intended to be traversable
 	file, err := os.Open(inputName)
 	if err != nil {

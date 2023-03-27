@@ -12,6 +12,7 @@ import (
 	"image"
 	"image/jpeg"
 	"image/png"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -32,13 +33,12 @@ func parseFlags() {
 
 func usage() {
 	fmt.Println("Unpacks image from texture format used by Stunt GP")
-	// TODO
-	//fmt.Println("Usage:\npc_unpack ")
 	fmt.Println("Flags:")
 	pflag.PrintDefaults()
 }
 
 func main() {
+	failed := false
 	parseFlags()
 	args := pflag.Args()
 	if len(args) < 1 {
@@ -46,82 +46,116 @@ func main() {
 		os.Exit(1)
 	}
 
+	if outputName != "" && len(args) > 1 {
+		fmt.Println("Output name can only be used with one input file")
+		usage()
+		os.Exit(1)
+	}
+
 	for _, inputName := range args {
-
-		if outputName == "" || len(args) > 1 {
-			outputName = strings.TrimSuffix(inputName, filepath.Ext(inputName)) + ".png"
-		}
-
-		fmt.Printf("Hi, today I'll unpack %s...\n", inputName)
-
-		// deepcode ignore PT: this is a CLI tool
-		file, err := os.Open(inputName)
+		f, err := os.Stat(inputName)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't open file %s!\nReason: %s\n", inputName, err)
-			os.Exit(3)
+			fmt.Printf("Failed to get info about %s: %s", inputName, err)
+			failed = true
 		}
-
-		config, format, err := image.DecodeConfig(file)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't read image file config %s!\nReason: %s\n", inputName, err)
-			os.Exit(4)
-		}
-		fmt.Println("Width:", config.Width, "Height:", config.Height, "Format:", format)
-
-		_, err = file.Seek(0, 0)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't seek in image file %s: %s\n", inputName, err)
-			os.Exit(4)
-		}
-
-		img, _, err := image.Decode(file)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't read image file %s!\nReason: %s\n", inputName, err)
-			os.Exit(4)
-		}
-
-		err = file.Close()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't close image file %s: %s\n", inputName, err)
-			os.Exit(4)
-		}
-
-		outputFile, err := os.Create(outputName)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't create output image file %s!\nReason: %s\n", outputName, err)
-			os.Exit(4)
-		}
-
-		ext := filepath.Ext(strings.ToLower(outputName))
-		switch ext {
-		case ".jpg":
-			fallthrough
-		case ".jpeg":
-			o := jpeg.Options{Quality: 90}
-			err = jpeg.Encode(outputFile, img, &o)
-		case ".png":
-			err = png.Encode(outputFile, img)
-		case ".pc":
-			err = texture.Encode(outputFile, img)
-		case ".dc":
-			encoder := texture.Encoder{
-				Compress: true,
-				Format:   texture.FDreamcast,
+		if f.IsDir() {
+			// TODO filepathwalk
+			walkFunc := getWalkFunc(&failed)
+			err := filepath.Walk(inputName, walkFunc)
+			if err != nil {
+				fmt.Printf("Failed to unpack dir %s: %s", inputName, err)
+				failed = true
 			}
-			err = encoder.Encode(outputFile, img)
-		default:
-			err = errors.New("unknown output format")
-		}
-
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't pack output image %s!\nReason: %s\n", outputName, err)
-			os.Exit(5)
-		}
-
-		err = outputFile.Close()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't close image file %s: %s\n", outputName, err)
-			os.Exit(4)
+		} else {
+			if outputName == "" || len(args) > 1 {
+				outputName = strings.TrimSuffix(inputName, filepath.Ext(inputName)) + ".png"
+			}
+			err := unpackTexture(inputName, outputName)
+			if err != nil {
+				fmt.Printf("Failed to unpack %s: %s", inputName, err)
+				failed = true
+			}
 		}
 	}
+	if failed {
+		os.Exit(1)
+	}
+}
+
+func getWalkFunc(failed *bool) filepath.WalkFunc {
+	return func(path string, info fs.FileInfo, err error) error {
+		if !info.IsDir() {
+			err := unpackTexture(path, "")
+			if err != nil {
+				fail := true
+				failed = &fail
+			}
+		}
+		return nil
+	}
+}
+
+func unpackTexture(inputName, outputName string) error {
+	// file deepcode ignore PT: This is CLI tool, this is intended to be traversable
+	file, err := os.Open(inputName)
+	if err != nil {
+		return fmt.Errorf("couldn't open file %s: %s", inputName, err)
+	}
+
+	config, format, err := image.DecodeConfig(file)
+	if err != nil {
+		return fmt.Errorf("couldn't read image file config %s: %s", inputName, err)
+	}
+	fmt.Println("Width:", config.Width, "Height:", config.Height, "Format:", format)
+
+	_, err = file.Seek(0, 0)
+	if err != nil {
+		return fmt.Errorf("couldn't seek in image file %s: %s", inputName, err)
+	}
+
+	img, _, err := image.Decode(file)
+	if err != nil {
+		return fmt.Errorf("couldn't read image file %s: %s", inputName, err)
+	}
+
+	err = file.Close()
+	if err != nil {
+		return fmt.Errorf("couldn't close image file %s: %s", inputName, err)
+	}
+
+	outputFile, err := os.Create(outputName)
+	if err != nil {
+		return fmt.Errorf("couldn't create output image file %s: %s", outputName, err)
+	}
+
+	ext := filepath.Ext(strings.ToLower(outputName))
+	switch ext {
+	case ".jpg":
+		fallthrough
+	case ".jpeg":
+		o := jpeg.Options{Quality: 90}
+		err = jpeg.Encode(outputFile, img, &o)
+	case ".png":
+		err = png.Encode(outputFile, img)
+	case ".pc":
+		err = texture.Encode(outputFile, img)
+	case ".dc":
+		encoder := texture.Encoder{
+			Compress: true,
+			Format:   texture.FDreamcast,
+		}
+		err = encoder.Encode(outputFile, img)
+	default:
+		err = errors.New("unknown output format")
+	}
+
+	if err != nil {
+		return fmt.Errorf("couldn't pack output image %s: %s", outputName, err)
+	}
+
+	err = outputFile.Close()
+	if err != nil {
+		return fmt.Errorf("couldn't close image file %s: %s", outputName, err)
+	}
+	return nil
 }
