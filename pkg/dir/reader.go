@@ -22,7 +22,7 @@ func FromDir(filename string) (Dir, error) {
 	}
 
 	if string(header.Magic[:]) != "DIR\x1a" {
-		return nil, fmt.Errorf("Incorrect magic, expected DIR\x1a, got %s", header.Magic)
+		return nil, fmt.Errorf("incorrect magic, expected DIR\x1a, got %s", header.Magic)
 	}
 
 	// jump to hash array
@@ -74,7 +74,7 @@ func readTable(r io.Reader) (HashTable, error) {
 		return table, err
 	}
 	if string(table.Header[:]) != "\x0a\x00\x00\x00" {
-		return table, fmt.Errorf("Incorrect magtable header, expected \x0a, got %s", table.Header)
+		return table, fmt.Errorf("incorrect magic table header, expected \x0a, got %s", table.Header)
 	}
 	return table, nil
 }

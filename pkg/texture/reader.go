@@ -40,7 +40,7 @@ func setPixel(p []byte, c uint16) {
 	p[3] = 0xFF
 }
 
-func (d decoder) decodeImage() (imageRGBA, error) {
+func (d *decoder) decodeImage() (imageRGBA, error) {
 	im := image.NewRGBA(image.Rect(0, 0, int(d.width), int(d.height)))
 	unpacked := 0
 	var word uint16
@@ -74,15 +74,13 @@ func (d decoder) decodeImage() (imageRGBA, error) {
 			}
 			unpacked += repeats
 
-		} else {
-			if ((word >> 15) & 1) == 0 {
-				// end reading
-				if word == 0 {
-					return imageRGBA{RGBA: im}, nil
-				}
-				// stream transparency
-				unpacked += int(word)
+		} else if ((word >> 15) & 1) == 0 {
+			// end reading
+			if word == 0 {
+				return imageRGBA{RGBA: im}, nil
 			}
+			// stream transparency
+			unpacked += int(word)
 		}
 	}
 	return imageRGBA{}, FormatError("Stunt GP texture: too many bytes")
@@ -217,7 +215,7 @@ func (d *decoder) readColorPalette() (color.Palette, error) {
 	return palette, nil
 }
 
-func (d decoder) decodePalleted() (*image.Paletted, error) {
+func (d *decoder) decodePalleted() (*image.Paletted, error) {
 	palettedImage := image.NewPaletted(image.Rect(0, 0, int(d.width), int(d.height)), d.palette)
 	pixels := palettedImage.Pix[0 : int(d.width)*int(d.height)]
 	_, err := io.ReadFull(d.r, pixels)

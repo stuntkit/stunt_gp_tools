@@ -139,11 +139,7 @@ func (w *writer) writeAll(f io.Writer) error {
 		return err
 	}
 
-	if err := w.writeEntries(f); err != nil {
-		return err
-	}
-
-	return nil
+	return w.writeEntries(f)
 }
 
 func (w *writer) writeHeader(f io.Writer) error {
@@ -157,10 +153,7 @@ func (w *writer) writeHeader(f io.Writer) error {
 	if err := binary.Write(f, binary.LittleEndian, fileSize); err != nil {
 		return err
 	}
-	if err := binary.Write(f, binary.LittleEndian, dirOffset); err != nil {
-		return err
-	}
-	return nil
+	return binary.Write(f, binary.LittleEndian, dirOffset)
 }
 
 func (w *writer) writeData(f io.Writer) error {
