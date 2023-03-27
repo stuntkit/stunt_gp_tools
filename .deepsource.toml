@@ -13,3 +13,7 @@ enabled = true
 
   [analyzers.meta]
   import_root = "github.com/StuntKit/stunt_gp_formats"
+
+[[analyzers]]
+name = "test-coverage"
+enabled = true
