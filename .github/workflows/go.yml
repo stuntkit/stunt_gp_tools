@@ -23,3 +23,14 @@ jobs:
 
     - name: Test
       run: make test
+
+    - name: Coverage
+      run: go test -coverprofile=cover.out ./...
+
+    - name: Report test-coverage to DeepSource
+      run: |
+        # Install the CLI
+        curl https://deepsource.io/cli | sh
+
+        # Send the report to DeepSource
+        ./bin/deepsource report --analyzer test-coverage --key go --value-file cover.out
