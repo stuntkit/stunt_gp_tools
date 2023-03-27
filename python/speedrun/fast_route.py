@@ -23,6 +23,8 @@ parser.add_argument(
 
 
 class PointTime:
+    """Stores Name and time in the way the game stores it"""
+
     def __init__(self, time: int, name: str = "..."):
         self.name = name
         self.time = time
@@ -35,12 +37,16 @@ class PointTime:
 
 
 class PointScore:
+    """Stores Name and score"""
+
     def __init__(self, score: int = 0, name: str = "..."):
         self.name = name
         self.score = score
 
 
 class ArcadePoint:
+    """stores arcade data"""
+
     def __init__(self):
         # default time for "..." player, 2 mins
         self.lap = PointTime(2 * 60 * 60, "...")
@@ -51,16 +57,19 @@ class ArcadePoint:
 
 
 def get_name(name: bytes) -> str:
+    """converts name to ascii string"""
     terminator = name.index(b"\x00")
     return name[:terminator].decode("ascii")
 
 
 def add_edge_if(graph, start: str, end: str, edge_weight: int):
+    """adds edge in the graph if the time is not 0"""
     if edge_weight is None:
         graph.add_edge(start, end, weight=edge_weight)
 
 
 def convert_time(time: int) -> str:
+    """converts time from the game's internal format"""
     minutes = int(time / 60 / 60)
     seconds = int(time / 60 - (minutes * 60))
     milliseconds = int((time / 60 - (minutes * 60) - seconds) * 100)
@@ -68,6 +77,7 @@ def convert_time(time: int) -> str:
 
 
 def main():
+    """Finds fastest Arcade route for speedrunning"""
     args = parser.parse_args()
     filename: str = args.filename
 
@@ -95,77 +105,7 @@ def main():
                     # add to list if the point is not empty
                     points[i] = point
 
-        # make graph
-        # TODO check if weight can be assigned to nodes rather than edges
-        #  and make that prettier
-
-        g = nx.DiGraph()
-        g.add_nodes_from(
-            [
-                "start",
-                "01",
-                "02",
-                "04",
-                "05",
-                "06",
-                "07",
-                "08",
-                "09",
-                "10",
-                "14",
-                "15",
-                "16",
-                "17",
-                "18",
-                "19",
-                "20",
-                "21",
-                "22",
-                "end",
-            ]
-        )
-        # 6 -> end points connections
-        add_edge_if(g, "08", "end", points[0].total.time)
-        add_edge_if(g, "05", "end", points[1].total.time)
-        add_edge_if(g, "17", "end", points[2].total.time)
-        add_edge_if(g, "21", "end", points[3].total.time)
-        add_edge_if(g, "14", "end", points[4].total.time)
-        add_edge_if(g, "10", "end", points[5].total.time)
-
-        # 5 -> 6 points connections
-        add_edge_if(g, "19", "08", points[6].total.time)
-        add_edge_if(g, "19", "05", points[6].total.time)
-        add_edge_if(g, "18", "05", points[7].total.time)
-        add_edge_if(g, "18", "17", points[7].total.time)
-        add_edge_if(g, "15", "17", points[8].total.time)
-        add_edge_if(g, "15", "21", points[8].total.time)
-        add_edge_if(g, "16", "21", points[9].total.time)
-        add_edge_if(g, "16", "14", points[9].total.time)
-        add_edge_if(g, "01", "14", points[10].total.time)
-        add_edge_if(g, "01", "10", points[10].total.time)
-
-        # 4 -> 5 points connections
-        add_edge_if(g, "07", "19", points[11].total.time)
-        add_edge_if(g, "07", "18", points[11].total.time)
-        add_edge_if(g, "22", "18", points[12].total.time)
-        add_edge_if(g, "22", "15", points[12].total.time)
-        add_edge_if(g, "09", "15", points[13].total.time)
-        add_edge_if(g, "09", "16", points[13].total.time)
-        add_edge_if(g, "04", "16", points[14].total.time)
-        add_edge_if(g, "04", "01", points[14].total.time)
-
-        # 3 -> 4 points connections
-        add_edge_if(g, "20", "07", points[15].total.time)
-        add_edge_if(g, "20", "22", points[15].total.time)
-        add_edge_if(g, "06", "22", points[16].total.time)
-        add_edge_if(g, "06", "09", points[16].total.time)
-        add_edge_if(g, "02", "09", points[17].total.time)
-        add_edge_if(g, "02", "04", points[17].total.time)
-
-        # start -> 3 points connections
-        add_edge_if(g, "start", "20", 0)
-        add_edge_if(g, "start", "06", 0)
-        add_edge_if(g, "start", "02", 0)
+        g = generate_graph(points)
 
         # there are 24 paths max from start to end
         shortests = list(nx.shortest_simple_paths(g, "start", "end", "weight"))
@@ -174,7 +114,8 @@ def main():
         else:
             if len(shortests) < args.count:
                 print(
-                    f"found only {len(shortests)} shortest paths, but {args.count} were requested",
+                    f"found only {len(shortests)} shortest paths,"
+                    " but {args.count} were requested",
                     file=sys.stderr,
                 )
                 # for insurance everything will work fine
@@ -208,12 +149,87 @@ def main():
             print(r"         20    06    02         ")
             print()
             print(
-                "See https://github.com/Halamix2/stunt_gp_formats/wiki/Tracks to see what track names corresponds to each ID"
+                "See https://github.com/Halamix2/stunt_gp_formats/wiki/Tracks"
+                " to see what track names corresponds to each ID"
             )
 
 
-# TODO print only unlocked paths (\/)
-# TODO another script for showing what was finished?
-# TODO prepare for new modes, all tracks and all connections speedruns
+def generate_graph(points):
+    """generates the connection graph and fills it with the drive times"""
+    # check if weight can be assigned to nodes rather than edges
+    g = nx.DiGraph()
+    g.add_nodes_from(
+        [
+            "start",
+            "01",
+            "02",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "end",
+        ]
+    )
+    # 6 -> end points connections
+    add_edge_if(g, "08", "end", points[0].total.time)
+    add_edge_if(g, "05", "end", points[1].total.time)
+    add_edge_if(g, "17", "end", points[2].total.time)
+    add_edge_if(g, "21", "end", points[3].total.time)
+    add_edge_if(g, "14", "end", points[4].total.time)
+    add_edge_if(g, "10", "end", points[5].total.time)
+
+    # 5 -> 6 points connections
+    add_edge_if(g, "19", "08", points[6].total.time)
+    add_edge_if(g, "19", "05", points[6].total.time)
+    add_edge_if(g, "18", "05", points[7].total.time)
+    add_edge_if(g, "18", "17", points[7].total.time)
+    add_edge_if(g, "15", "17", points[8].total.time)
+    add_edge_if(g, "15", "21", points[8].total.time)
+    add_edge_if(g, "16", "21", points[9].total.time)
+    add_edge_if(g, "16", "14", points[9].total.time)
+    add_edge_if(g, "01", "14", points[10].total.time)
+    add_edge_if(g, "01", "10", points[10].total.time)
+
+    # 4 -> 5 points connections
+    add_edge_if(g, "07", "19", points[11].total.time)
+    add_edge_if(g, "07", "18", points[11].total.time)
+    add_edge_if(g, "22", "18", points[12].total.time)
+    add_edge_if(g, "22", "15", points[12].total.time)
+    add_edge_if(g, "09", "15", points[13].total.time)
+    add_edge_if(g, "09", "16", points[13].total.time)
+    add_edge_if(g, "04", "16", points[14].total.time)
+    add_edge_if(g, "04", "01", points[14].total.time)
+
+    # 3 -> 4 points connections
+    add_edge_if(g, "20", "07", points[15].total.time)
+    add_edge_if(g, "20", "22", points[15].total.time)
+    add_edge_if(g, "06", "22", points[16].total.time)
+    add_edge_if(g, "06", "09", points[16].total.time)
+    add_edge_if(g, "02", "09", points[17].total.time)
+    add_edge_if(g, "02", "04", points[17].total.time)
+
+    # start -> 3 points connections
+    add_edge_if(g, "start", "20", 0)
+    add_edge_if(g, "start", "06", 0)
+    add_edge_if(g, "start", "02", 0)
+
+    return g
+
+
+# in the future: print only unlocked paths (\/)
+# in the future: another script for showing what was finished?
+# in the future: prepare for new modes, all tracks and all connections speedruns
 if __name__ == "__main__":
     main()

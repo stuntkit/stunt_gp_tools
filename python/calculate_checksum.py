@@ -14,6 +14,7 @@ def checksum(data):
 
 
 def main():
+    """opens setup.bin, calculates checksum and compares against saved one"""
     with open("setup.bin", "rb") as savefile:
         copied = list(savefile.read())
         expected = struct.unpack("<I", bytes(copied[4:8]))[0]
