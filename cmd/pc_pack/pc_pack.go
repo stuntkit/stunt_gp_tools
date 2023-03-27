@@ -1,7 +1,7 @@
 /*
 Pc_pack converts some popular image formats to Stunt GP textures.
 
-This program acceptsjpg or png files.
+This program accepts jpg or png files.
 It can output PC, DC and PS2 textures (except paletted ones).
 */
 package main
@@ -42,6 +42,7 @@ func usage() {
 }
 
 func main() {
+	failed := false
 	parseFlags()
 	args := pflag.Args()
 	if len(args) < 1 {
@@ -56,53 +57,67 @@ func main() {
 	}
 
 	for _, inputName := range args {
-		if outputName == "" || len(args) > 1 {
-			outputName = strings.TrimSuffix(inputName, filepath.Ext(inputName)) + ".pc"
-		}
+		f, _ := os.Stat(inputName)
+		if f.IsDir() {
+			// TODO filepathwalk
+		} else {
 
-		fmt.Printf("Hi, today I'll pack %s...\n", inputName)
+			if outputName == "" || len(args) > 1 {
+				outputName = strings.TrimSuffix(inputName, filepath.Ext(inputName)) + ".pc"
+			}
 
-		// deepcode ignore PT: this is a CLI tool
-		file, err := os.Open(inputName)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't open file %s!\n", inputName)
-			os.Exit(3)
-		}
+			err := unpackTexture(inputName, outputName)
+			if err != nil {
+				fmt.Printf("Failed to unpack %s: %s", inputName, err)
+				failed = true
+			}
 
-		img, _, err := image.Decode(file)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't read image file %s!\n", inputName)
-			os.Exit(4)
-		}
-
-		err = file.Close()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't close image file %s: %s\n", inputName, err)
-			os.Exit(4)
-		}
-
-		outputFile, err := os.Create(outputName)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't create output image file %s!\n", outputName)
-			os.Exit(4)
-		}
-
-		textureFormat := texture.FPC
-		if dreamcast {
-			textureFormat = texture.FDreamcast
-		}
-		fmt.Printf("packing %s...\n", outputName)
-		enc := texture.Encoder{Compress: !uncompressed, Format: textureFormat}
-		err = enc.Encode(outputFile, img)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't pack output image %s!\n", outputName)
-			os.Exit(5)
-		}
-
-		err = outputFile.Close()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't close image file %s: %s\n", outputName, err)
-			os.Exit(4)
 		}
 	}
+	if failed {
+		os.Exit(1)
+	}
+}
+
+func unpackTexture(inputName, outputName string) error {
+	fmt.Printf("Hi, today I'll pack %s...\n", inputName)
+
+	// file deepcode ignore PT: This is CLI tool, this is intended to be traversable
+	file, err := os.Open(inputName)
+	if err != nil {
+		return fmt.Errorf("couldn't open file %s", inputName)
+	}
+
+	img, _, err := image.Decode(file)
+	if err != nil {
+		return fmt.Errorf("couldn't read image file %s", inputName)
+	}
+
+	err = file.Close()
+	if err != nil {
+		return fmt.Errorf("couldn't close image file %s: %s", inputName, err)
+	}
+
+	outputFile, err := os.Create(outputName)
+	if err != nil {
+		return fmt.Errorf("couldn't create output image file %s", outputName)
+	}
+
+	textureFormat := texture.FPC
+	if dreamcast {
+		textureFormat = texture.FDreamcast
+	}
+	fmt.Printf("packing %s...\n", outputName)
+	enc := texture.Encoder{Compress: !uncompressed, Format: textureFormat}
+	err = enc.Encode(outputFile, img)
+	if err != nil {
+		return fmt.Errorf("couldn't pack output image %s", outputName)
+	}
+
+	err = outputFile.Close()
+	if err != nil {
+		return fmt.Errorf("couldn't close image file %s: %s", outputName, err)
+	}
+
+	return nil
 }
