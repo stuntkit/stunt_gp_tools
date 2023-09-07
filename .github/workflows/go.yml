@@ -2,37 +2,39 @@ name: Go
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+
+permissions: # permissions for the Github token
+  contents: read
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: 1.19
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21
 
-    - name: Build
-      run: make build_all
+      - name: Build
+        run: make build_all
 
-    - name: Test
-      run: make test
+      - name: Test
+        run: make test
 
-    - name: Coverage
-      run: go test -coverprofile=cover.out ./...
+      - name: Coverage
+        run: go test -coverprofile=cover.out ./...
 
-    - name: Report test-coverage to DeepSource
-      env: 
-        DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
-      run: |
-        # Install the CLI
-        curl https://deepsource.io/cli | sh
+      - name: Report test-coverage to DeepSource
+        env:
+          DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
+        run: |
+          # Install the CLI
+          curl https://deepsource.io/cli | sh
 
-        # Send the report to DeepSource
-        ./bin/deepsource report --analyzer test-coverage --key go --value-file cover.out
+          # Send the report to DeepSource
+          ./bin/deepsource report --analyzer test-coverage --key go --value-file cover.out
