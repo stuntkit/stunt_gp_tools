@@ -12,7 +12,7 @@ name = "go"
 enabled = true
 
   [analyzers.meta]
-  import_root = "github.com/StuntKit/stunt_gp_formats"
+  import_root = "github.com/stuntkit/stunt_gp_tools"
 
 [[analyzers]]
 name = "test-coverage"

@@ -17,8 +17,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/halamix2/stunt_gp_tools/pkg/texture"
 	"github.com/spf13/pflag"
+	"github.com/stuntkit/stunt_gp_tools/pkg/texture"
 )
 
 // flags

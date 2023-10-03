@@ -1,4 +1,4 @@
-module github.com/halamix2/stunt_gp_tools
+module github.com/stuntkit/stunt_gp_tools
 
 go 1.19
 

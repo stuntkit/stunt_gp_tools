@@ -149,7 +149,7 @@ def main():
             print(r"         20    06    02         ")
             print()
             print(
-                "See https://github.com/Halamix2/stunt_gp_formats/wiki/Tracks"
+                "See https://github.com/stuntkit/stunt_gp_tools/wiki/Tracks"
                 " to see what track names corresponds to each ID"
             )
 

@@ -1,8 +1,8 @@
-Stunt GP tools
-==
+# Stunt GP tools
+
 [![a](https://discord.com/api/guilds/749260704447463495/widget.png?style=shield)](https://discord.gg/ykzAWnA)
 
-[![DeepSource](https://deepsource.io/gh/stuntkit/stunt_gp_formats.svg/?label=active+issues&token=xrA_xeEtEOj9PK-TMnSL4ZBU)](https://deepsource.io/gh/stuntkit/stunt_gp_formats/?ref=repository-badge)
+[![DeepSource](https://deepsource.io/gh/stuntkit/stunt_gp_tools.svg/?label=active+issues&token=xrA_xeEtEOj9PK-TMnSL4ZBU)](https://deepsource.io/gh/stuntkit/stunt_gp_tools/?ref=repository-badge)
 
 These tools will help you understand, unpack and edit Stunt GP files
 
@@ -11,13 +11,16 @@ Original thread: [https://forum.xentax.com/viewtopic.php?f=16&t=16944&p=160266#p
 Check out [the wiki](https://sgp.halamix2.pl) for more information about the game and its file formats.
 
 ## Compilation:
+
 ```
 go build cmd/pc_pack/pc_pack.go
 go build cmd/pc_unpack/pc_unpack.go
 ```
-Or grab compiled .exe [here](https://github.com/StuntKit/stunt_gp_formats/releases)
+
+Or grab compiled .exe [here](https://github.com/stuntkit/stunt_gp_tools/releases)
 
 ## Usage:
+
 You can also drag and drop multiple files on `pc_pack` or `pc_unpack`
 
 ```bash
@@ -34,4 +37,3 @@ You can also drag and drop multiple files on `pc_pack` or `pc_unpack`
 
 ./pc_unpack mini.pc -o output.png
 ```
-
